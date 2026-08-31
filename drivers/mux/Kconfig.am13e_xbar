@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: 2026 Texas Instruments Incorporated
+# SPDX-License-Identifier: Apache-2.0
+
+config MUX_AM13E_XBAR
+	bool "AM13E Input/Output Crossbar (XBAR) mux driver"
+	default y
+	depends on DT_HAS_TI_AM13E_XBAR_INPUT_ENABLED || DT_HAS_TI_AM13E_XBAR_OUTPUT_ENABLED
+	help
+	  Enable the AM13E Input Crossbar (INPUTXBAR) and Output Crossbar
+	  (OUTPUTXBAR) mux driver.

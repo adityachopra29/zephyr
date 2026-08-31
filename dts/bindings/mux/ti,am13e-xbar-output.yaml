@@ -1,0 +1,47 @@
+# SPDX-FileCopyrightText: 2026 Texas Instruments Incorporated
+# SPDX-License-Identifier: Apache-2.0
+
+description: |
+  TI AM13E Output Crossbar (OUTPUTXBAR).
+
+  Routes one of the peripheral output sources onto one of the 12 output
+  channels. Each output has a pair of one-hot source-select registers
+  (G0SEL, G1SEL); at most one bit may be set across the pair at a time.
+
+  The single cell selects the output. The state value encodes the source:
+  bits [15:8] select the group (0 = G0SEL, 1 = G1SEL) and bits [7:0] select
+  the one-hot bit within that register.
+
+compatible: "ti,am13e-xbar-output"
+
+include: [base.yaml, mux-controller.yaml]
+
+properties:
+  reg:
+    required: true
+
+  "#mux-control-cells":
+    const: 1
+
+  "#mux-state-cells":
+    const: 2
+
+mux-control-cells:
+  - output
+
+mux-state-cells:
+  - output
+  - source
+
+examples:
+  - |
+    outputxbar: output-xbar@4046a000 {
+            compatible = "ti,am13e-xbar-output";
+            reg = <0x4046a000 0x400>;
+            #mux-control-cells = <1>;
+            #mux-state-cells = <2>;
+    };
+
+    ecap0-apwm-output {
+            mux-states = <&outputxbar 8 0x08>; /* output=8, group=0 bit=8 */
+    };

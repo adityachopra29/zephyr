@@ -1,0 +1,46 @@
+# SPDX-FileCopyrightText: 2026 Texas Instruments Incorporated
+# SPDX-License-Identifier: Apache-2.0
+
+description: |
+  TI AM13E Input Crossbar (INPUTXBAR).
+
+  Routes a raw GPIO pin number onto one of the 28 input channels. Each
+  channel has its own INPUTSELECT register holding the routed pin number
+  (or the DRIVE_HIGH/DRIVE_LOW pseudo-pin sentinels 0xFE/0xFF).
+
+  The single cell selects the input channel. The state value is the pin
+  number routed onto that channel.
+
+compatible: "ti,am13e-xbar-input"
+
+include: [base.yaml, mux-controller.yaml]
+
+properties:
+  reg:
+    required: true
+
+  "#mux-control-cells":
+    const: 1
+
+  "#mux-state-cells":
+    const: 2
+
+mux-control-cells:
+  - channel
+
+mux-state-cells:
+  - channel
+  - pin
+
+examples:
+  - |
+    inputxbar: input-xbar@40468000 {
+            compatible = "ti,am13e-xbar-input";
+            reg = <0x40468000 0x420>;
+            #mux-control-cells = <1>;
+            #mux-state-cells = <2>;
+    };
+
+    ecap1-capture-input {
+            mux-states = <&inputxbar 0 36>; /* channel=0, pin=GPIO36 (PB4) */
+    };
