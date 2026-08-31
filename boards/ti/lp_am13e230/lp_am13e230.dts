@@ -7,6 +7,8 @@
 /dts-v1/;
 
 #include <ti/am13/am13e23019.dtsi>
+#include <zephyr/dt-bindings/pinctrl/am13e-pinctrl.h>
+#include <zephyr/dt-bindings/pwm/pwm.h>
 
 / {
 	model = "TI AM13E230X Launchpad";
@@ -16,4 +18,41 @@
 		zephyr,sram = &sram0_1_2;
 		zephyr,flash = &flash0;
 	};
+
+	aliases {
+		pwm-led0 = &pwm_led0;
+	};
+
+	pwmleds {
+		compatible = "pwm-leds";
+
+		pwm_led0: pwm_led_0 {
+			pwms = <&ecap0 0 PWM_MSEC(20) PWM_POLARITY_NORMAL>;
+		};
+	};
+};
+
+&pinctrl {
+	ecap0_apwm_pb3: ecap0_apwm_pb3 {
+		pinmux = <AM13E_PINMUX(35, AM13E_PIN_FUNCTION_16)>;
+	};
+
+	ecap1_capture_pb4: ecap1_capture_pb4 {
+		pinmux = <AM13E_PINMUX(36, AM13E_PIN_FUNCTION_GPIO)>;
+		input-enable;
+	};
+};
+
+&ecap0 {
+	status = "okay";
+	pinctrl-0 = <&ecap0_apwm_pb3>;
+	pinctrl-names = "default";
+	mux-states = <&outputxbar 8 0x08>; /* OUTPUTXBAR8, G0SEL bit 8 -> PB3 */
+};
+
+&ecap1 {
+	status = "okay";
+	pinctrl-0 = <&ecap1_capture_pb4>;
+	pinctrl-names = "default";
+	mux-states = <&inputxbar 0 36>; /* INPUTXBAR1 (index 0) <- GPIO36 (PB4) */
 };
