@@ -1,0 +1,104 @@
+# SPDX-FileCopyrightText: 2026 Texas Instruments Incorporated
+# SPDX-License-Identifier: Apache-2.0
+
+description: |
+    TI AM13E pinctrl node.
+
+    Device pin configuration should be placed in the child nodes of this node.
+    Populate the 'pinmux' field with a pair consisting of a PINCM index and
+    its IO function, via the AM13E_PINMUX() macro.
+
+    The node has the 'pinctrl' node label set in your SoC's devicetree,
+    so you can modify it like this:
+
+      &pinctrl {
+              /* your modifications go here */
+      };
+
+    All device pin configurations should be placed in child nodes of the
+    'pinctrl' node, as in the example below.
+
+    Here is a list of supported standard pin properties:
+
+    - bias-disable: Disable pull-up/down.
+    - bias-pull-down: Enable pull-down resistor.
+    - bias-pull-up: Enable pull-up resistor.
+    - drive-open-drain: Output driver is open-drain.
+    - drive-open-drain: Output driver is open-source.
+    - drive-strength: Maximum current that can be sourced from the pin.
+    - input-enable: enable input.
+    - ti,invert: enable logical inversion of a digital input or output
+    - ti,hysteresis: enable hysteresis control on open-drain pins
+
+    Include the AM13E dt-bindings header in the board level DTS:
+
+      #include <zephyr/dt-bindings/pinctrl/am13e-pinctrl.h>
+
+    To change a pin's pinctrl default properties add a reference to the
+    pin in the board's DTS file or in the project overlay and set the
+    properties, e.g.:
+
+      &pinctrl {
+        ecap0_apwm_pb3: ecap0_apwm_pb3 {
+          pinmux = <AM13E_PINMUX(36, AM13E_PIN_FUNCTION_8)>;
+          input-enable;
+        };
+      };
+
+    The PINCM index in the pinmux define is obtained from the device-specific
+    datasheet/TRM pin table.
+
+compatible: "ti,am13e-pinctrl"
+
+include: base.yaml
+
+properties:
+  reg:
+    required: true
+
+child-binding:
+  description: |
+    This binding gives a base representation of the AM13E
+    pins configuration.
+
+  include:
+    - name: pincfg-node.yaml
+      property-allowlist:
+        - bias-disable
+        - bias-pull-down
+        - bias-pull-up
+        - bias-high-impedance
+        - drive-open-drain
+        - drive-open-source
+        - drive-strength
+        - input-enable
+
+  properties:
+    pinmux:
+      required: true
+      type: int
+      description: |
+        AM13E pin's configuration (PINCM index, IO function).
+
+    drive-strength:
+      enum:
+        - 6
+        - 20
+      default: 6
+      description: |
+        The drive strength controls the maximum output drive strength sunk or
+        sourced by an I/O pin.
+          6: max 6 mA (SoC default)
+          20: max 20 mA on high-drive capable IOs only (HDIO).
+
+    ti,invert:
+      type: boolean
+      description: |
+        Enables inversion of the input or output using the internal
+        inversion capability of the GPIO
+
+    ti,hysteresis:
+      type: boolean
+      description: |
+        Enables the hysteresis control for access to CMOS logic
+        (on open-drain capable pins)

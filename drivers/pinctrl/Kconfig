@@ -41,6 +41,7 @@ config PINCTRL_KEEP_SLEEP_STATE
 # zephyr-keep-sorted-start
 source "drivers/pinctrl/Kconfig.aesc"
 source "drivers/pinctrl/Kconfig.alif"
+source "drivers/pinctrl/Kconfig.am13e"
 source "drivers/pinctrl/Kconfig.ambiq"
 source "drivers/pinctrl/Kconfig.ameba"
 source "drivers/pinctrl/Kconfig.arm_mps2"

@@ -9,6 +9,7 @@ zephyr_library_sources(common.c)
 # zephyr-keep-sorted-start
 zephyr_library_sources_ifdef(CONFIG_PINCTRL_AESC pinctrl_aesc.c)
 zephyr_library_sources_ifdef(CONFIG_PINCTRL_ALIF pinctrl_alif.c)
+zephyr_library_sources_ifdef(CONFIG_PINCTRL_AM13E pinctrl_am13e.c)
 zephyr_library_sources_ifdef(CONFIG_PINCTRL_AMBIQ pinctrl_ambiq.c)
 zephyr_library_sources_ifdef(CONFIG_PINCTRL_AMEBA pinctrl_ameba.c)
 zephyr_library_sources_ifdef(CONFIG_PINCTRL_ARM_MPS2 pinctrl_arm_mps2.c)

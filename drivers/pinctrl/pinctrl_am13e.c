@@ -1,0 +1,60 @@
+/*
+ * SPDX-FileCopyrightText: 2026 Texas Instruments Incorporated
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#include <zephyr/drivers/pinctrl.h>
+#include <zephyr/logging/log.h>
+#include <zephyr/sys/sys_io.h>
+
+LOG_MODULE_REGISTER(pinctrl_am13e, CONFIG_PINCTRL_LOG_LEVEL);
+
+#define DT_DRV_COMPAT ti_am13e_pinctrl
+
+#define AM13E_PINCM(pinmux)        (pinmux >> 0x10)
+#define AM13E_PIN_FUNCTION(pinmux) (pinmux & 0x3F)
+
+/*
+ * Unlike MSPM0's IOMUX_SECCFG_Regs, AM13E's PINCM register array has no
+ * leading RESERVED0 word - PINCM[0] sits at IOMUX_BASE + 0.
+ * Each PINCM register is 4 bytes wide.
+ * Bit 7 (PC) must be set to connect the pin to a peripheral function.
+ */
+#define AM13E_PINCM_ADDR(n)      (DT_INST_REG_ADDR(0) + (uint32_t)(n) * 4U)
+#define AM13E_PINCM_PC_CONNECTED BIT(7)
+
+int pinctrl_configure_pins(const pinctrl_soc_pin_t *pins, uint8_t pin_cnt, uintptr_t reg)
+{
+	ARG_UNUSED(reg);
+
+	uint8_t pin_function;
+	uint32_t pin_cm;
+	uint32_t iomux;
+	mm_reg_t addr;
+
+	for (int i = 0; i < pin_cnt; i++) {
+		pin_cm = AM13E_PINCM(pins[i].pinmux);
+		pin_function = AM13E_PIN_FUNCTION(pins[i].pinmux);
+		iomux = pins[i].iomux;
+		addr = AM13E_PINCM_ADDR(pin_cm);
+
+		/* Check for invalid pull-up/pull-down configuration */
+		if (((iomux >> AM13E_GPIO_RESISTOR_PULL_UP) & 0x1) &&
+		    ((iomux >> AM13E_GPIO_RESISTOR_PULL_DOWN) & 0x1)) {
+			LOG_ERR("Pin CM%d: Cannot enable both pull-up and pull-down "
+				"simultaneously",
+				pin_cm);
+			return -EINVAL;
+		}
+
+		if (pin_function == 0x00) {
+			/* Analog: disconnect pin from all peripheral functions */
+			sys_write32(0U, addr);
+		} else {
+			sys_write32((iomux | pin_function) | AM13E_PINCM_PC_CONNECTED, addr);
+		}
+	}
+
+	return 0;
+}
