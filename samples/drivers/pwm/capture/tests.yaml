@@ -18,3 +18,4 @@ tests:
   sample.drivers.pwm.capture:
     platform_allow:
       - lp_mspm0g3507
+      - lp_am13e230
