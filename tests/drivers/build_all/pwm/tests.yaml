@@ -75,6 +75,9 @@ tests:
     extra_args: DTC_OVERLAY_FILE=max2221x.overlay
     extra_configs:
       - CONFIG_GPIO=y # needed by MAX2221x driver
+  drivers.pwm.ti_am3352_ecap.build:
+    depends_on: pwm
+    platform_allow: lp_am13e230
   drivers.pwm.bitbang.build:
     platform_allow:
       - native_sim
