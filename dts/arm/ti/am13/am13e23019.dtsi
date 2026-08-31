@@ -49,6 +49,43 @@
 				#size-cells = <1>;
 			};
 		};
+
+		pinctrl: pin-controller@400cc000 {
+			compatible = "ti,am13e-pinctrl";
+			reg = <0x400cc000 0x1b0>;
+		};
+
+		inputxbar: input-xbar@40468000 {
+			compatible = "ti,am13e-xbar-input";
+			reg = <0x40468000 0x420>;
+			#mux-control-cells = <1>;
+			#mux-state-cells = <2>;
+		};
+
+		outputxbar: output-xbar@4046a000 {
+			compatible = "ti,am13e-xbar-output";
+			reg = <0x4046a000 0x400>;
+			#mux-control-cells = <1>;
+			#mux-state-cells = <2>;
+		};
+
+		ecap0: ecap@40440000 {
+			compatible = "ti,am3352-ecap";
+			reg = <0x40440000 0x100>;
+			interrupts = <29 0>;
+			clock-frequency = <DT_FREQ_M(32)>;
+			#pwm-cells = <3>;
+			status = "disabled";
+		};
+
+		ecap1: ecap@40441000 {
+			compatible = "ti,am3352-ecap";
+			reg = <0x40441000 0x100>;
+			interrupts = <30 0>;
+			clock-frequency = <DT_FREQ_M(32)>;
+			#pwm-cells = <3>;
+			status = "disabled";
+		};
 	};
 };
 
