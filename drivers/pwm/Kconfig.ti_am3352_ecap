@@ -8,5 +8,6 @@ config PWM_TI_AM3352_ECAP
 	depends on CLOCK_CONTROL
 	select PINCTRL
 	select MUX if DT_HAS_TI_AM13E230_XBAR_IN_ENABLED || DT_HAS_TI_AM13E230_XBAR_OUT_ENABLED
+	select GPIO if $(dt_compat_any_has_prop,$(DT_COMPAT_TI_AM3352_ECAP),capture-gpios)
 	help
 	  Enable ECAP controller for TI SoCs
