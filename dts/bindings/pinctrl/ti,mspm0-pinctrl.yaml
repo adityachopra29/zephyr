@@ -120,3 +120,22 @@ child-binding:
       description: |
         Enables the hysteresis control for access to CMOS logic
         (on open-drain capable pins)
+
+    ti,xbar-out:
+      type: array
+      description: |
+        Crossbar route metadata for SoCs whose peripheral outputs reach
+        pins through an Output X-BAR (e.g. AM13E). Three cells:
+        <output group bit>, where "output" is the zero-based OUTPUTXBARx
+        index whose pad function this node's pinmux selects, and
+        "group"/"bit" address the one-hot GxSEL source-select bit of the
+        peripheral signal driving it. Consumed by client peripheral
+        drivers (e.g. the eCAP PWM driver), not by the pinctrl driver.
+
+    ti,xbar-in-gpio:
+      type: int
+      description: |
+        Crossbar route metadata for SoCs whose Input X-BAR taps pins by
+        raw GPIO number (e.g. AM13E): the GPIO number under which the
+        Input X-BAR reads this node's pin. Consumed by client peripheral
+        drivers (e.g. the eCAP PWM driver), not by the pinctrl driver.
