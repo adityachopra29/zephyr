@@ -16,13 +16,16 @@
 			reg = <0x400cc000 0x400>;
 		};
 
+		/* Internal signal-routing fabrics with no board-level
+		 * dependency: enabled by default so crossbar consumers
+		 * (eCAP, ...) work without board boilerplate.
+		 */
 		xbar1: xbar@40468000 {
 			compatible = "ti,am13e230-xbar-in";
 			reg = <0x40468000 0x1000>;
 
 			#mux-control-cells = <1>;
 			#mux-state-cells = <2>;
-			status = "disabled";
 		};
 
 		xbar2: xbar@4046a000 {
@@ -31,13 +34,17 @@
 
 			#mux-control-cells = <1>;
 			#mux-state-cells = <2>;
-			status = "disabled";
 		};
 
 		ecap0: ecap@40440000 {
 			compatible = "ti,am3352-ecap";
 			reg = <0x40440000 0x40>;
+			interrupts = <29 0>;
 			clocks = <&ckm MSPM0_CLOCK_MCLK>;
+
+			ti,output-xbar = <&xbar2>;
+			ti,input-xbar = <&xbar1>;
+			ti,inputxbar-channel = <0>;
 
 			#pwm-cells = <3>;
 			status = "disabled";
@@ -46,7 +53,12 @@
 		ecap1: ecap@40441000 {
 			compatible = "ti,am3352-ecap";
 			reg = <0x40441000 0x40>;
+			interrupts = <30 0>;
 			clocks = <&ckm MSPM0_CLOCK_MCLK>;
+
+			ti,output-xbar = <&xbar2>;
+			ti,input-xbar = <&xbar1>;
+			ti,inputxbar-channel = <1>;
 
 			#pwm-cells = <3>;
 			status = "disabled";
