@@ -39,11 +39,19 @@ struct am13e230_xbar_config {
 
 struct am13e230_xbar_data {
 	DEVICE_MMIO_RAM;
+	/* Channels claimed by consumers, and the packed (pin, raw) routing
+	 * each holds: a second consumer asking for a different routing on a
+	 * claimed channel is a configuration conflict, not something the
+	 * crossbar can arbitrate.
+	 */
+	uint32_t claimed;
+	uint16_t routing[AM13E230_XBAR_IN_NUM_CHANNELS];
 };
 
 static int am13e230_xbar_set(const struct device *dev, const struct mux_control *control,
 			     uint32_t state)
 {
+	struct am13e230_xbar_data *data = dev->data;
 	uint32_t base = DEVICE_MMIO_GET(dev);
 	uint32_t channel = control->cells[0];
 	uint32_t pin = AM13E230_XBAR_IN_STATE_PIN(state);
@@ -64,6 +72,12 @@ static int am13e230_xbar_set(const struct device *dev, const struct mux_control 
 		return -EINVAL;
 	}
 
+	if ((data->claimed & BIT(channel)) != 0U && data->routing[channel] != (uint16_t)state) {
+		LOG_ERR("input xbar channel %u already claimed with routing 0x%04x", channel,
+			data->routing[channel]);
+		return -EBUSY;
+	}
+
 	addr = base + AM13E230_XBAR_IN_INPUTSELECT_OFFSET +
 	       AM13E230_XBAR_IN_CHANNEL_SELECT_OFFSET(channel);
 	sys_write32(pin, addr);
@@ -77,6 +91,9 @@ static int am13e230_xbar_set(const struct device *dev, const struct mux_control 
 		raw_val &= ~BIT(bit);
 	}
 	sys_write32(raw_val, raw_addr);
+
+	data->claimed |= BIT(channel);
+	data->routing[channel] = (uint16_t)state;
 
 	LOG_DBG("xbar routed: channel=%u <- pin=%u raw=%u", channel, pin, raw);
 
