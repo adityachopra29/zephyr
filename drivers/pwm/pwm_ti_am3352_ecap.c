@@ -5,6 +5,8 @@
 
 #include <zephyr/irq.h>
 #include <zephyr/dt-bindings/pwm/pwm.h>
+#include <zephyr/dt-bindings/mux/ti_am13e230_xbar_in.h>
+#include <zephyr/dt-bindings/mux/ti_am13e230_xbar_out.h>
 #include <zephyr/drivers/mux.h>
 #include <zephyr/drivers/pinctrl.h>
 #include <zephyr/drivers/pwm.h>
@@ -79,14 +81,6 @@ struct ti_ecap_capture_data {
 	bool continuous;
 };
 
-/* One crossbar routing applied through the mux subsystem at init, decoded
- * from a "mux-states" phandle-array entry.
- */
-struct ti_ecap_mux_entry {
-	const struct device *dev;
-	const struct mux_state *state;
-};
-
 struct ti_ecap_cfg {
 	DEVICE_MMIO_ROM;
 	void (*irq_config_func)();
@@ -94,10 +88,16 @@ struct ti_ecap_cfg {
 	clock_control_subsys_t clock_subsys;
 	uint32_t clock_frequency;
 	const struct pinctrl_dev_config *pcfg;
-	const struct ti_ecap_mux_entry *mux_entries;
-	uint8_t mux_entries_count;
-	bool has_input_xbar;
-	uint8_t input_xbar_channel;
+	/* Crossbar routes derived from the "ti,xbar-out"/"ti,xbar-in-gpio"
+	 * metadata on the first pinctrl-0 entry (crossbar-routed SoCs only,
+	 * e.g. AM13E); NULL devices when the pin is reached directly.
+	 */
+	const struct device *out_xbar;
+	const struct mux_control *out_ctrl;
+	const struct device *in_xbar;
+	const struct mux_control *in_ctrl;
+	uint32_t in_route_state;
+	uint8_t in_channel;
 };
 
 struct ti_ecap_data {
@@ -271,25 +271,38 @@ static int ti_ecap_init(const struct device *dev)
 		return ret;
 	}
 
-	for (uint8_t i = 0; i < cfg->mux_entries_count; i++) {
-		const struct ti_ecap_mux_entry *entry = &cfg->mux_entries[i];
-
-		if (!device_is_ready(entry->dev)) {
-			LOG_ERR("xbar device not ready");
+	if (cfg->out_xbar != NULL) {
+		if (!device_is_ready(cfg->out_xbar)) {
+			LOG_ERR("output xbar not ready");
 			return -ENODEV;
 		}
 
-		ret = mux_state_apply(entry->dev, entry->state);
+		ret = mux_control_set(cfg->out_xbar, cfg->out_ctrl, 1);
 		if (ret < 0) {
-			LOG_ERR("failed to apply mux state %d: %d", i, ret);
+			LOG_ERR("failed to route APWM output: %d", ret);
 			return ret;
 		}
 	}
 
-	if (cfg->has_input_xbar) {
+	if (cfg->in_xbar != NULL) {
+		if (!device_is_ready(cfg->in_xbar)) {
+			LOG_ERR("input xbar not ready");
+			return -ENODEV;
+		}
+
+		ret = mux_control_set(cfg->in_xbar, cfg->in_ctrl, cfg->in_route_state);
+		if (ret < 0) {
+			LOG_ERR("failed to route capture input: %d", ret);
+			return ret;
+		}
+
+		/* ECCTL0.INPUTSEL is a mux internal to the eCAP, indexing
+		 * INPUTXBAR1-16 at entries 0-15 of its own source table:
+		 * point it at the claimed Input X-BAR channel.
+		 */
 		regs = DEV_REGS(dev);
 		regs->ECCTL0 = (regs->ECCTL0 & ~TI_ECAP_ECCTL0_INPUTSEL_MASK) |
-			       FIELD_PREP(TI_ECAP_ECCTL0_INPUTSEL_MASK, cfg->input_xbar_channel);
+			       FIELD_PREP(TI_ECAP_ECCTL0_INPUTSEL_MASK, cfg->in_channel);
 	}
 
 	cfg->irq_config_func();
@@ -363,40 +376,58 @@ static DEVICE_API(pwm, ti_ecap_api) = {
 			(clock_control_subsys_t)&ti_ecap_mspm0_sys_clock_##n;                     \
 	), (BUILD_ASSERT(0, "Unsupported clock controller");))))))
 
-/* One entry per "mux-states" phandle-array element: applies the crossbar
- * routing (Input or Output XBAR) named by that entry through the mux
- * subsystem.
+/* On crossbar-routed SoCs (e.g. AM13E) the route lives as metadata on the
+ * first pinctrl-0 entry: "ti,xbar-out = <output group bit>" for the APWM
+ * output, "ti,xbar-in-gpio = <gpio>" for the capture input. The X-BAR
+ * devices themselves come from "ti,output-xbar"/"ti,input-xbar" phandles
+ * that the SoC devicetree sets on the eCAP node.
  */
-#define TI_ECAP_MUX_ENTRY(node_id, prop, idx)                                                      \
-	{                                                                                          \
-		.dev = MUX_STATE_DT_DEV_GET_BY_IDX(node_id, idx),                                  \
-		.state = MUX_STATE_DT_GET_BY_IDX(node_id, idx),                                    \
-	}
+#define TI_ECAP_PIN_NODE(n) DT_PINCTRL_0(DT_DRV_INST(n), 0)
 
-#define TI_ECAP_MUX_ENTRIES_DEFINE(n)                                                              \
-	IF_ENABLED(DT_INST_NODE_HAS_PROP(n, mux_states),                                          \
-		   (MUX_STATE_DT_INST_SPEC_DEFINE_ALL(n);                                         \
-		    static const struct ti_ecap_mux_entry ti_ecap_mux_entries_##n[] = {          \
-			    DT_INST_FOREACH_PROP_ELEM_SEP(n, mux_states, TI_ECAP_MUX_ENTRY,      \
-							   (,))};))
+#define TI_ECAP_HAS_OUT_ROUTE(n)                                                                   \
+	UTIL_AND(DT_INST_NODE_HAS_PROP(n, ti_output_xbar),                                         \
+		 DT_NODE_HAS_PROP(TI_ECAP_PIN_NODE(n), ti_xbar_out))
 
-/* If a "mux-states" entry is named "input", its control cell is the Input
- * XBAR channel that feeds this eCAP's own ECCTL0.INPUTSEL field - a
- * separate mux internal to the eCAP, indexing into its own 128-entry table
- * (INPUTXBAR1-16 occupy indices 0-15), not the crossbar's own addressing.
+#define TI_ECAP_HAS_IN_ROUTE(n)                                                                    \
+	UTIL_AND(DT_INST_NODE_HAS_PROP(n, ti_input_xbar),                                          \
+		 DT_NODE_HAS_PROP(TI_ECAP_PIN_NODE(n), ti_xbar_in_gpio))
+
+#define TI_ECAP_ROUTES_DEFINE(n)                                                                   \
+	IF_ENABLED(TI_ECAP_HAS_OUT_ROUTE(n),                                                       \
+		   (static const uint32_t ti_ecap_out_cells_##n[] = {AM13E230_XBAR_OUT_CTRL(       \
+			    DT_PROP_BY_IDX(TI_ECAP_PIN_NODE(n), ti_xbar_out, 0),                   \
+			    DT_PROP_BY_IDX(TI_ECAP_PIN_NODE(n), ti_xbar_out, 1),                   \
+			    DT_PROP_BY_IDX(TI_ECAP_PIN_NODE(n), ti_xbar_out, 2))};                 \
+		    static const struct mux_control ti_ecap_out_ctrl_##n = {                       \
+			    .cells = ti_ecap_out_cells_##n,                                        \
+			    .len = 1,                                                              \
+		    };))                                                                           \
+	IF_ENABLED(TI_ECAP_HAS_IN_ROUTE(n),                                                        \
+		   (static const uint32_t ti_ecap_in_cells_##n[] = {                               \
+			    DT_INST_PROP(n, ti_inputxbar_channel)};                                \
+		    static const struct mux_control ti_ecap_in_ctrl_##n = {                        \
+			    .cells = ti_ecap_in_cells_##n,                                         \
+			    .len = 1,                                                              \
+		    };))
+
+/* raw=1: route the raw pad signal. The pin is pinctrl-owned here, so the
+ * GPIO-module-processed path (raw=0) carries no signal.
  */
-#define TI_ECAP_MUX_ENTRIES_INIT(n)                                                                \
-	COND_CODE_1(DT_INST_NODE_HAS_PROP(n, mux_states),                                         \
-		    (.mux_entries = ti_ecap_mux_entries_##n,                                      \
-		     .mux_entries_count = ARRAY_SIZE(ti_ecap_mux_entries_##n),), ()) \
-	COND_CODE_1(DT_INST_PROP_HAS_NAME(n, mux_states, input),                                  \
-		    (.has_input_xbar = true,                                                      \
-		     .input_xbar_channel = DT_INST_PHA_BY_NAME(n, mux_states, input, channel),), ())
+#define TI_ECAP_ROUTES_INIT(n)                                                                     \
+	IF_ENABLED(TI_ECAP_HAS_OUT_ROUTE(n),                                                       \
+		   (.out_xbar = DEVICE_DT_GET(DT_INST_PHANDLE(n, ti_output_xbar)),                 \
+		    .out_ctrl = &ti_ecap_out_ctrl_##n,))                                           \
+	IF_ENABLED(TI_ECAP_HAS_IN_ROUTE(n),                                                        \
+		   (.in_xbar = DEVICE_DT_GET(DT_INST_PHANDLE(n, ti_input_xbar)),                   \
+		    .in_ctrl = &ti_ecap_in_ctrl_##n,                                               \
+		    .in_route_state = AM13E230_XBAR_IN_STATE(                                      \
+			    DT_PROP(TI_ECAP_PIN_NODE(n), ti_xbar_in_gpio), 1),                     \
+		    .in_channel = DT_INST_PROP(n, ti_inputxbar_channel),))
 
 #define TI_ECAP_INIT(n)                                                                            \
 	TI_ECAP_DEFINE_CLK_SUBSYS(n);                                                              \
 	PINCTRL_DT_INST_DEFINE(n);                                                                 \
-	TI_ECAP_MUX_ENTRIES_DEFINE(n);                                                             \
+	TI_ECAP_ROUTES_DEFINE(n)                                                                   \
 	static void ti_ecap_irq_config_func_##n(void)                                              \
 	{                                                                                          \
 		IRQ_CONNECT(                                                                       \
@@ -412,7 +443,7 @@ static DEVICE_API(pwm, ti_ecap_api) = {
 		.clock_subsys = ti_ecap_clk_subsys_##n,                                            \
 		.irq_config_func = ti_ecap_irq_config_func_##n,                                    \
 		.pcfg = PINCTRL_DT_INST_DEV_CONFIG_GET(n),                                         \
-		TI_ECAP_MUX_ENTRIES_INIT(n)};                                                      \
+		TI_ECAP_ROUTES_INIT(n)};                                                           \
                                                                                                    \
 	static struct ti_ecap_data ti_ecap_data_##n;                                               \
                                                                                                    \
