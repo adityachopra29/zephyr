@@ -5,31 +5,28 @@ description: |
   TI SOC ECAP based PWM controller
 
   On SoCs where the eCAP's pins are reachable only through a crossbar
-  (e.g. AM13E), reference the crossbar via "mux-states" instead of adding
-  SoC-specific pinmux logic to this driver:
+  (e.g. AM13E), the routing travels with the pin choice: the first entry
+  of pinctrl-0 carries "ti,xbar-out" (APWM output) or "ti,xbar-in-gpio"
+  (capture input) metadata, and the SoC devicetree sets the
+  "ti,output-xbar"/"ti,input-xbar" device phandles plus the claimed
+  "ti,inputxbar-channel" on the eCAP node. A board then only selects the
+  route node:
 
     &ecap0 {
-            pinctrl-0 = <&my_apwm_pin>;
+            pinctrl-0 = <&ecap0_out_pb3>;
             pinctrl-names = "default";
-
-            mux-states = <&xbar_out AM13E230_XBAR_OUT_CTRL(idx, group, bit) 1>;
-            mux-state-names = "output";
     };
 
     &ecap1 {
-            pinctrl-0 = <&my_capture_pin>;
+            pinctrl-0 = <&inputxbar_pb4>;
             pinctrl-names = "default";
-
-            mux-states = <&xbar_in CHANNEL AM13E230_XBAR_IN_STATE(GPIO_NUMBER, 1)>;
-            mux-state-names = "input";
     };
 
-  A "mux-states" entry named "input" additionally feeds this eCAP's own
-  ECCTL0.INPUTSEL field (AM13E-only) with that entry's crossbar channel,
-  since ECCTL0 is a mux internal to the eCAP, separate from the crossbar
-  itself.
+  A "ti,xbar-in-gpio" route additionally feeds this eCAP's own
+  ECCTL0.INPUTSEL field with "ti,inputxbar-channel", since ECCTL0 is a
+  mux internal to the eCAP, separate from the crossbar itself.
 
-include: [pwm-controller.yaml, base.yaml, pinctrl-device.yaml, mux-consumer.yaml]
+include: [pwm-controller.yaml, base.yaml, pinctrl-device.yaml]
 
 compatible: "ti,am3352-ecap"
 
