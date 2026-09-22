@@ -24,6 +24,15 @@ properties:
       carries the pin's pinmux, applied via pinctrl_configure_pins(). A node
       with pinmux 0 marks a non-bonded pin.
 
+  ti,xbar-gpio-base:
+    type: int
+    description: |
+      GPIO number of this port's pin 0 in the device-wide GPIO numbering
+      the Input X-BAR uses to select a source (e.g. port B pin 0 is
+      GPIO32, so its base is 32). Consumers that capture a pin through the
+      Input X-BAR (e.g. eCAP) add this base to the pin index to get the
+      X-BAR source. Only needed on SoCs with an Input X-BAR (e.g. AM13E).
+
 gpio-cells:
   - pin
   - flags

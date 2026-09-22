@@ -37,6 +37,7 @@
 			status = "disabled";
 			gpio-controller;
 			#gpio-cells = <2>;
+			ti,xbar-gpio-base = <0>;
 		};
 
 		gpiob: gpio@400f2000 {
@@ -46,6 +47,7 @@
 			status = "disabled";
 			gpio-controller;
 			#gpio-cells = <2>;
+			ti,xbar-gpio-base = <32>;
 		};
 
 		gpioc: gpio@400f4000 {
@@ -55,6 +57,7 @@
 			status = "disabled";
 			gpio-controller;
 			#gpio-cells = <2>;
+			ti,xbar-gpio-base = <64>;
 		};
 
 		gpiod: gpio@400f6000 {
@@ -64,6 +67,7 @@
 			status = "disabled";
 			gpio-controller;
 			#gpio-cells = <2>;
+			ti,xbar-gpio-base = <96>;
 		};
 
 		flash: flash-controller@40028000 {
