@@ -1,0 +1,2014 @@
+/*
+ * Copyright (c) 2026 Texas Instruments Incorporated
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Crossbar (X-BAR) routes for AM13E230: pin configurations that combine
+ * the IOMUX function with the crossbar route metadata ("ti,xbar-out" /
+ * "ti,xbar-in-gpio") consumed by peripheral drivers. This file collects
+ * every X-BAR-routed pin option for the SoC; it currently covers the
+ * eCAP APWM output and capture input routes.
+ *
+ * Generated from TI AM13E230X SDK hw_pinmap.h and dl_xbar.h by
+ * gen_am13e230_xbar_routes.py. Do not edit by hand.
+ */
+
+#include <zephyr/dt-bindings/pinctrl/mspm0-pinctrl.h>
+
+&pinctrl {
+
+	/* ECAP0_OUT -> OUTPUTXBAR8 -> PA0 */
+	/omit-if-no-ref/ ecap0_out_pa0: ecap0_out_pa0 {
+		pinmux = <MSP_PINMUX(1, 16)>;
+		ti,xbar-out = <7 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR8 -> PA0 */
+	/omit-if-no-ref/ ecap1_out_pa0: ecap1_out_pa0 {
+		pinmux = <MSP_PINMUX(1, 16)>;
+		ti,xbar-out = <7 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR4 -> PA1 */
+	/omit-if-no-ref/ ecap0_out_pa1: ecap0_out_pa1 {
+		pinmux = <MSP_PINMUX(2, 16)>;
+		ti,xbar-out = <3 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR4 -> PA1 */
+	/omit-if-no-ref/ ecap1_out_pa1: ecap1_out_pa1 {
+		pinmux = <MSP_PINMUX(2, 16)>;
+		ti,xbar-out = <3 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR5 -> PA2 */
+	/omit-if-no-ref/ ecap0_out_pa2: ecap0_out_pa2 {
+		pinmux = <MSP_PINMUX(3, 16)>;
+		ti,xbar-out = <4 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR5 -> PA2 */
+	/omit-if-no-ref/ ecap1_out_pa2: ecap1_out_pa2 {
+		pinmux = <MSP_PINMUX(3, 16)>;
+		ti,xbar-out = <4 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR6 -> PA3 */
+	/omit-if-no-ref/ ecap0_out_pa3: ecap0_out_pa3 {
+		pinmux = <MSP_PINMUX(4, 16)>;
+		ti,xbar-out = <5 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR6 -> PA3 */
+	/omit-if-no-ref/ ecap1_out_pa3: ecap1_out_pa3 {
+		pinmux = <MSP_PINMUX(4, 16)>;
+		ti,xbar-out = <5 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR6 -> PA4 */
+	/omit-if-no-ref/ ecap0_out_pa4: ecap0_out_pa4 {
+		pinmux = <MSP_PINMUX(5, 16)>;
+		ti,xbar-out = <5 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR6 -> PA4 */
+	/omit-if-no-ref/ ecap1_out_pa4: ecap1_out_pa4 {
+		pinmux = <MSP_PINMUX(5, 16)>;
+		ti,xbar-out = <5 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR7 -> PA5 */
+	/omit-if-no-ref/ ecap0_out_pa5: ecap0_out_pa5 {
+		pinmux = <MSP_PINMUX(6, 16)>;
+		ti,xbar-out = <6 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR7 -> PA5 */
+	/omit-if-no-ref/ ecap1_out_pa5: ecap1_out_pa5 {
+		pinmux = <MSP_PINMUX(6, 16)>;
+		ti,xbar-out = <6 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR8 -> PA6 */
+	/omit-if-no-ref/ ecap0_out_pa6: ecap0_out_pa6 {
+		pinmux = <MSP_PINMUX(7, 16)>;
+		ti,xbar-out = <7 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR8 -> PA6 */
+	/omit-if-no-ref/ ecap1_out_pa6: ecap1_out_pa6 {
+		pinmux = <MSP_PINMUX(7, 16)>;
+		ti,xbar-out = <7 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR1 -> PA7 */
+	/omit-if-no-ref/ ecap0_out_pa7: ecap0_out_pa7 {
+		pinmux = <MSP_PINMUX(8, 16)>;
+		ti,xbar-out = <0 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR1 -> PA7 */
+	/omit-if-no-ref/ ecap1_out_pa7: ecap1_out_pa7 {
+		pinmux = <MSP_PINMUX(8, 16)>;
+		ti,xbar-out = <0 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR3 -> PA8 */
+	/omit-if-no-ref/ ecap0_out_pa8: ecap0_out_pa8 {
+		pinmux = <MSP_PINMUX(9, 16)>;
+		ti,xbar-out = <2 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR3 -> PA8 */
+	/omit-if-no-ref/ ecap1_out_pa8: ecap1_out_pa8 {
+		pinmux = <MSP_PINMUX(9, 16)>;
+		ti,xbar-out = <2 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR4 -> PA9 */
+	/omit-if-no-ref/ ecap0_out_pa9: ecap0_out_pa9 {
+		pinmux = <MSP_PINMUX(10, 16)>;
+		ti,xbar-out = <3 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR4 -> PA9 */
+	/omit-if-no-ref/ ecap1_out_pa9: ecap1_out_pa9 {
+		pinmux = <MSP_PINMUX(10, 16)>;
+		ti,xbar-out = <3 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR8 -> PA10 */
+	/omit-if-no-ref/ ecap0_out_pa10: ecap0_out_pa10 {
+		pinmux = <MSP_PINMUX(11, 16)>;
+		ti,xbar-out = <7 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR8 -> PA10 */
+	/omit-if-no-ref/ ecap1_out_pa10: ecap1_out_pa10 {
+		pinmux = <MSP_PINMUX(11, 16)>;
+		ti,xbar-out = <7 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR5 -> PA11 */
+	/omit-if-no-ref/ ecap0_out_pa11: ecap0_out_pa11 {
+		pinmux = <MSP_PINMUX(12, 16)>;
+		ti,xbar-out = <4 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR5 -> PA11 */
+	/omit-if-no-ref/ ecap1_out_pa11: ecap1_out_pa11 {
+		pinmux = <MSP_PINMUX(12, 16)>;
+		ti,xbar-out = <4 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR6 -> PA12 */
+	/omit-if-no-ref/ ecap0_out_pa12: ecap0_out_pa12 {
+		pinmux = <MSP_PINMUX(13, 16)>;
+		ti,xbar-out = <5 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR6 -> PA12 */
+	/omit-if-no-ref/ ecap1_out_pa12: ecap1_out_pa12 {
+		pinmux = <MSP_PINMUX(13, 16)>;
+		ti,xbar-out = <5 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR7 -> PA13 */
+	/omit-if-no-ref/ ecap0_out_pa13: ecap0_out_pa13 {
+		pinmux = <MSP_PINMUX(14, 16)>;
+		ti,xbar-out = <6 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR7 -> PA13 */
+	/omit-if-no-ref/ ecap1_out_pa13: ecap1_out_pa13 {
+		pinmux = <MSP_PINMUX(14, 16)>;
+		ti,xbar-out = <6 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR8 -> PA14 */
+	/omit-if-no-ref/ ecap0_out_pa14: ecap0_out_pa14 {
+		pinmux = <MSP_PINMUX(15, 16)>;
+		ti,xbar-out = <7 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR8 -> PA14 */
+	/omit-if-no-ref/ ecap1_out_pa14: ecap1_out_pa14 {
+		pinmux = <MSP_PINMUX(15, 16)>;
+		ti,xbar-out = <7 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR1 -> PA15 */
+	/omit-if-no-ref/ ecap0_out_pa15: ecap0_out_pa15 {
+		pinmux = <MSP_PINMUX(16, 16)>;
+		ti,xbar-out = <0 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR1 -> PA15 */
+	/omit-if-no-ref/ ecap1_out_pa15: ecap1_out_pa15 {
+		pinmux = <MSP_PINMUX(16, 16)>;
+		ti,xbar-out = <0 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR1 -> PA16 */
+	/omit-if-no-ref/ ecap0_out_pa16: ecap0_out_pa16 {
+		pinmux = <MSP_PINMUX(17, 16)>;
+		ti,xbar-out = <0 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR1 -> PA16 */
+	/omit-if-no-ref/ ecap1_out_pa16: ecap1_out_pa16 {
+		pinmux = <MSP_PINMUX(17, 16)>;
+		ti,xbar-out = <0 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR2 -> PA17 */
+	/omit-if-no-ref/ ecap0_out_pa17: ecap0_out_pa17 {
+		pinmux = <MSP_PINMUX(18, 16)>;
+		ti,xbar-out = <1 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR2 -> PA17 */
+	/omit-if-no-ref/ ecap1_out_pa17: ecap1_out_pa17 {
+		pinmux = <MSP_PINMUX(18, 16)>;
+		ti,xbar-out = <1 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR3 -> PA18 */
+	/omit-if-no-ref/ ecap0_out_pa18: ecap0_out_pa18 {
+		pinmux = <MSP_PINMUX(19, 16)>;
+		ti,xbar-out = <2 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR3 -> PA18 */
+	/omit-if-no-ref/ ecap1_out_pa18: ecap1_out_pa18 {
+		pinmux = <MSP_PINMUX(19, 16)>;
+		ti,xbar-out = <2 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR2 -> PA19 */
+	/omit-if-no-ref/ ecap0_out_pa19: ecap0_out_pa19 {
+		pinmux = <MSP_PINMUX(20, 16)>;
+		ti,xbar-out = <1 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR2 -> PA19 */
+	/omit-if-no-ref/ ecap1_out_pa19: ecap1_out_pa19 {
+		pinmux = <MSP_PINMUX(20, 16)>;
+		ti,xbar-out = <1 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR3 -> PA20 */
+	/omit-if-no-ref/ ecap0_out_pa20: ecap0_out_pa20 {
+		pinmux = <MSP_PINMUX(21, 16)>;
+		ti,xbar-out = <2 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR3 -> PA20 */
+	/omit-if-no-ref/ ecap1_out_pa20: ecap1_out_pa20 {
+		pinmux = <MSP_PINMUX(21, 16)>;
+		ti,xbar-out = <2 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR4 -> PA21 */
+	/omit-if-no-ref/ ecap0_out_pa21: ecap0_out_pa21 {
+		pinmux = <MSP_PINMUX(22, 16)>;
+		ti,xbar-out = <3 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR4 -> PA21 */
+	/omit-if-no-ref/ ecap1_out_pa21: ecap1_out_pa21 {
+		pinmux = <MSP_PINMUX(22, 16)>;
+		ti,xbar-out = <3 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR5 -> PA22 */
+	/omit-if-no-ref/ ecap0_out_pa22: ecap0_out_pa22 {
+		pinmux = <MSP_PINMUX(23, 16)>;
+		ti,xbar-out = <4 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR5 -> PA22 */
+	/omit-if-no-ref/ ecap1_out_pa22: ecap1_out_pa22 {
+		pinmux = <MSP_PINMUX(23, 16)>;
+		ti,xbar-out = <4 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR6 -> PA23 */
+	/omit-if-no-ref/ ecap0_out_pa23: ecap0_out_pa23 {
+		pinmux = <MSP_PINMUX(24, 16)>;
+		ti,xbar-out = <5 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR6 -> PA23 */
+	/omit-if-no-ref/ ecap1_out_pa23: ecap1_out_pa23 {
+		pinmux = <MSP_PINMUX(24, 16)>;
+		ti,xbar-out = <5 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR7 -> PA24 */
+	/omit-if-no-ref/ ecap0_out_pa24: ecap0_out_pa24 {
+		pinmux = <MSP_PINMUX(25, 16)>;
+		ti,xbar-out = <6 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR7 -> PA24 */
+	/omit-if-no-ref/ ecap1_out_pa24: ecap1_out_pa24 {
+		pinmux = <MSP_PINMUX(25, 16)>;
+		ti,xbar-out = <6 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR7 -> PA25 */
+	/omit-if-no-ref/ ecap0_out_pa25: ecap0_out_pa25 {
+		pinmux = <MSP_PINMUX(26, 16)>;
+		ti,xbar-out = <6 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR7 -> PA25 */
+	/omit-if-no-ref/ ecap1_out_pa25: ecap1_out_pa25 {
+		pinmux = <MSP_PINMUX(26, 16)>;
+		ti,xbar-out = <6 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR2 -> PA26 */
+	/omit-if-no-ref/ ecap0_out_pa26: ecap0_out_pa26 {
+		pinmux = <MSP_PINMUX(27, 16)>;
+		ti,xbar-out = <1 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR2 -> PA26 */
+	/omit-if-no-ref/ ecap1_out_pa26: ecap1_out_pa26 {
+		pinmux = <MSP_PINMUX(27, 16)>;
+		ti,xbar-out = <1 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR3 -> PA27 */
+	/omit-if-no-ref/ ecap0_out_pa27: ecap0_out_pa27 {
+		pinmux = <MSP_PINMUX(28, 16)>;
+		ti,xbar-out = <2 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR3 -> PA27 */
+	/omit-if-no-ref/ ecap1_out_pa27: ecap1_out_pa27 {
+		pinmux = <MSP_PINMUX(28, 16)>;
+		ti,xbar-out = <2 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR4 -> PA28 */
+	/omit-if-no-ref/ ecap0_out_pa28: ecap0_out_pa28 {
+		pinmux = <MSP_PINMUX(29, 16)>;
+		ti,xbar-out = <3 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR4 -> PA28 */
+	/omit-if-no-ref/ ecap1_out_pa28: ecap1_out_pa28 {
+		pinmux = <MSP_PINMUX(29, 16)>;
+		ti,xbar-out = <3 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR5 -> PA29 */
+	/omit-if-no-ref/ ecap0_out_pa29: ecap0_out_pa29 {
+		pinmux = <MSP_PINMUX(30, 16)>;
+		ti,xbar-out = <4 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR5 -> PA29 */
+	/omit-if-no-ref/ ecap1_out_pa29: ecap1_out_pa29 {
+		pinmux = <MSP_PINMUX(30, 16)>;
+		ti,xbar-out = <4 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR6 -> PA30 */
+	/omit-if-no-ref/ ecap0_out_pa30: ecap0_out_pa30 {
+		pinmux = <MSP_PINMUX(31, 16)>;
+		ti,xbar-out = <5 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR6 -> PA30 */
+	/omit-if-no-ref/ ecap1_out_pa30: ecap1_out_pa30 {
+		pinmux = <MSP_PINMUX(31, 16)>;
+		ti,xbar-out = <5 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR2 -> PA31 */
+	/omit-if-no-ref/ ecap0_out_pa31: ecap0_out_pa31 {
+		pinmux = <MSP_PINMUX(32, 16)>;
+		ti,xbar-out = <1 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR2 -> PA31 */
+	/omit-if-no-ref/ ecap1_out_pa31: ecap1_out_pa31 {
+		pinmux = <MSP_PINMUX(32, 16)>;
+		ti,xbar-out = <1 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR5 -> PB0 */
+	/omit-if-no-ref/ ecap0_out_pb0: ecap0_out_pb0 {
+		pinmux = <MSP_PINMUX(33, 16)>;
+		ti,xbar-out = <4 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR5 -> PB0 */
+	/omit-if-no-ref/ ecap1_out_pb0: ecap1_out_pb0 {
+		pinmux = <MSP_PINMUX(33, 16)>;
+		ti,xbar-out = <4 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR6 -> PB1 */
+	/omit-if-no-ref/ ecap0_out_pb1: ecap0_out_pb1 {
+		pinmux = <MSP_PINMUX(34, 16)>;
+		ti,xbar-out = <5 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR6 -> PB1 */
+	/omit-if-no-ref/ ecap1_out_pb1: ecap1_out_pb1 {
+		pinmux = <MSP_PINMUX(34, 16)>;
+		ti,xbar-out = <5 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR7 -> PB2 */
+	/omit-if-no-ref/ ecap0_out_pb2: ecap0_out_pb2 {
+		pinmux = <MSP_PINMUX(35, 16)>;
+		ti,xbar-out = <6 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR7 -> PB2 */
+	/omit-if-no-ref/ ecap1_out_pb2: ecap1_out_pb2 {
+		pinmux = <MSP_PINMUX(35, 16)>;
+		ti,xbar-out = <6 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR8 -> PB3 */
+	/omit-if-no-ref/ ecap0_out_pb3: ecap0_out_pb3 {
+		pinmux = <MSP_PINMUX(36, 16)>;
+		ti,xbar-out = <7 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR8 -> PB3 */
+	/omit-if-no-ref/ ecap1_out_pb3: ecap1_out_pb3 {
+		pinmux = <MSP_PINMUX(36, 16)>;
+		ti,xbar-out = <7 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR2 -> PB4 */
+	/omit-if-no-ref/ ecap0_out_pb4: ecap0_out_pb4 {
+		pinmux = <MSP_PINMUX(37, 16)>;
+		ti,xbar-out = <1 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR2 -> PB4 */
+	/omit-if-no-ref/ ecap1_out_pb4: ecap1_out_pb4 {
+		pinmux = <MSP_PINMUX(37, 16)>;
+		ti,xbar-out = <1 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR3 -> PB5 */
+	/omit-if-no-ref/ ecap0_out_pb5: ecap0_out_pb5 {
+		pinmux = <MSP_PINMUX(38, 16)>;
+		ti,xbar-out = <2 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR3 -> PB5 */
+	/omit-if-no-ref/ ecap1_out_pb5: ecap1_out_pb5 {
+		pinmux = <MSP_PINMUX(38, 16)>;
+		ti,xbar-out = <2 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR3 -> PB6 */
+	/omit-if-no-ref/ ecap0_out_pb6: ecap0_out_pb6 {
+		pinmux = <MSP_PINMUX(39, 16)>;
+		ti,xbar-out = <2 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR3 -> PB6 */
+	/omit-if-no-ref/ ecap1_out_pb6: ecap1_out_pb6 {
+		pinmux = <MSP_PINMUX(39, 16)>;
+		ti,xbar-out = <2 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR4 -> PB7 */
+	/omit-if-no-ref/ ecap0_out_pb7: ecap0_out_pb7 {
+		pinmux = <MSP_PINMUX(40, 16)>;
+		ti,xbar-out = <3 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR4 -> PB7 */
+	/omit-if-no-ref/ ecap1_out_pb7: ecap1_out_pb7 {
+		pinmux = <MSP_PINMUX(40, 16)>;
+		ti,xbar-out = <3 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR2 -> PB8 */
+	/omit-if-no-ref/ ecap0_out_pb8: ecap0_out_pb8 {
+		pinmux = <MSP_PINMUX(41, 16)>;
+		ti,xbar-out = <1 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR2 -> PB8 */
+	/omit-if-no-ref/ ecap1_out_pb8: ecap1_out_pb8 {
+		pinmux = <MSP_PINMUX(41, 16)>;
+		ti,xbar-out = <1 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR3 -> PB9 */
+	/omit-if-no-ref/ ecap0_out_pb9: ecap0_out_pb9 {
+		pinmux = <MSP_PINMUX(42, 16)>;
+		ti,xbar-out = <2 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR3 -> PB9 */
+	/omit-if-no-ref/ ecap1_out_pb9: ecap1_out_pb9 {
+		pinmux = <MSP_PINMUX(42, 16)>;
+		ti,xbar-out = <2 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR2 -> PB10 */
+	/omit-if-no-ref/ ecap0_out_pb10: ecap0_out_pb10 {
+		pinmux = <MSP_PINMUX(43, 16)>;
+		ti,xbar-out = <1 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR2 -> PB10 */
+	/omit-if-no-ref/ ecap1_out_pb10: ecap1_out_pb10 {
+		pinmux = <MSP_PINMUX(43, 16)>;
+		ti,xbar-out = <1 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR3 -> PB11 */
+	/omit-if-no-ref/ ecap0_out_pb11: ecap0_out_pb11 {
+		pinmux = <MSP_PINMUX(44, 16)>;
+		ti,xbar-out = <2 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR3 -> PB11 */
+	/omit-if-no-ref/ ecap1_out_pb11: ecap1_out_pb11 {
+		pinmux = <MSP_PINMUX(44, 16)>;
+		ti,xbar-out = <2 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR4 -> PB12 */
+	/omit-if-no-ref/ ecap0_out_pb12: ecap0_out_pb12 {
+		pinmux = <MSP_PINMUX(45, 16)>;
+		ti,xbar-out = <3 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR4 -> PB12 */
+	/omit-if-no-ref/ ecap1_out_pb12: ecap1_out_pb12 {
+		pinmux = <MSP_PINMUX(45, 16)>;
+		ti,xbar-out = <3 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR6 -> PB13 */
+	/omit-if-no-ref/ ecap0_out_pb13: ecap0_out_pb13 {
+		pinmux = <MSP_PINMUX(46, 16)>;
+		ti,xbar-out = <5 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR6 -> PB13 */
+	/omit-if-no-ref/ ecap1_out_pb13: ecap1_out_pb13 {
+		pinmux = <MSP_PINMUX(46, 16)>;
+		ti,xbar-out = <5 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR1 -> PB14 */
+	/omit-if-no-ref/ ecap0_out_pb14: ecap0_out_pb14 {
+		pinmux = <MSP_PINMUX(47, 16)>;
+		ti,xbar-out = <0 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR1 -> PB14 */
+	/omit-if-no-ref/ ecap1_out_pb14: ecap1_out_pb14 {
+		pinmux = <MSP_PINMUX(47, 16)>;
+		ti,xbar-out = <0 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR2 -> PB15 */
+	/omit-if-no-ref/ ecap0_out_pb15: ecap0_out_pb15 {
+		pinmux = <MSP_PINMUX(48, 16)>;
+		ti,xbar-out = <1 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR2 -> PB15 */
+	/omit-if-no-ref/ ecap1_out_pb15: ecap1_out_pb15 {
+		pinmux = <MSP_PINMUX(48, 16)>;
+		ti,xbar-out = <1 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR2 -> PB16 */
+	/omit-if-no-ref/ ecap0_out_pb16: ecap0_out_pb16 {
+		pinmux = <MSP_PINMUX(49, 16)>;
+		ti,xbar-out = <1 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR2 -> PB16 */
+	/omit-if-no-ref/ ecap1_out_pb16: ecap1_out_pb16 {
+		pinmux = <MSP_PINMUX(49, 16)>;
+		ti,xbar-out = <1 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR3 -> PB17 */
+	/omit-if-no-ref/ ecap0_out_pb17: ecap0_out_pb17 {
+		pinmux = <MSP_PINMUX(50, 16)>;
+		ti,xbar-out = <2 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR3 -> PB17 */
+	/omit-if-no-ref/ ecap1_out_pb17: ecap1_out_pb17 {
+		pinmux = <MSP_PINMUX(50, 16)>;
+		ti,xbar-out = <2 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR4 -> PB18 */
+	/omit-if-no-ref/ ecap0_out_pb18: ecap0_out_pb18 {
+		pinmux = <MSP_PINMUX(51, 16)>;
+		ti,xbar-out = <3 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR4 -> PB18 */
+	/omit-if-no-ref/ ecap1_out_pb18: ecap1_out_pb18 {
+		pinmux = <MSP_PINMUX(51, 16)>;
+		ti,xbar-out = <3 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR5 -> PB19 */
+	/omit-if-no-ref/ ecap0_out_pb19: ecap0_out_pb19 {
+		pinmux = <MSP_PINMUX(52, 16)>;
+		ti,xbar-out = <4 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR5 -> PB19 */
+	/omit-if-no-ref/ ecap1_out_pb19: ecap1_out_pb19 {
+		pinmux = <MSP_PINMUX(52, 16)>;
+		ti,xbar-out = <4 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR6 -> PB20 */
+	/omit-if-no-ref/ ecap0_out_pb20: ecap0_out_pb20 {
+		pinmux = <MSP_PINMUX(53, 16)>;
+		ti,xbar-out = <5 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR6 -> PB20 */
+	/omit-if-no-ref/ ecap1_out_pb20: ecap1_out_pb20 {
+		pinmux = <MSP_PINMUX(53, 16)>;
+		ti,xbar-out = <5 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR7 -> PB21 */
+	/omit-if-no-ref/ ecap0_out_pb21: ecap0_out_pb21 {
+		pinmux = <MSP_PINMUX(54, 16)>;
+		ti,xbar-out = <6 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR7 -> PB21 */
+	/omit-if-no-ref/ ecap1_out_pb21: ecap1_out_pb21 {
+		pinmux = <MSP_PINMUX(54, 16)>;
+		ti,xbar-out = <6 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR8 -> PB22 */
+	/omit-if-no-ref/ ecap0_out_pb22: ecap0_out_pb22 {
+		pinmux = <MSP_PINMUX(55, 16)>;
+		ti,xbar-out = <7 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR8 -> PB22 */
+	/omit-if-no-ref/ ecap1_out_pb22: ecap1_out_pb22 {
+		pinmux = <MSP_PINMUX(55, 16)>;
+		ti,xbar-out = <7 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR1 -> PB23 */
+	/omit-if-no-ref/ ecap0_out_pb23: ecap0_out_pb23 {
+		pinmux = <MSP_PINMUX(56, 16)>;
+		ti,xbar-out = <0 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR1 -> PB23 */
+	/omit-if-no-ref/ ecap1_out_pb23: ecap1_out_pb23 {
+		pinmux = <MSP_PINMUX(56, 16)>;
+		ti,xbar-out = <0 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR3 -> PB24 */
+	/omit-if-no-ref/ ecap0_out_pb24: ecap0_out_pb24 {
+		pinmux = <MSP_PINMUX(57, 16)>;
+		ti,xbar-out = <2 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR3 -> PB24 */
+	/omit-if-no-ref/ ecap1_out_pb24: ecap1_out_pb24 {
+		pinmux = <MSP_PINMUX(57, 16)>;
+		ti,xbar-out = <2 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR4 -> PB25 */
+	/omit-if-no-ref/ ecap0_out_pb25: ecap0_out_pb25 {
+		pinmux = <MSP_PINMUX(58, 16)>;
+		ti,xbar-out = <3 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR4 -> PB25 */
+	/omit-if-no-ref/ ecap1_out_pb25: ecap1_out_pb25 {
+		pinmux = <MSP_PINMUX(58, 16)>;
+		ti,xbar-out = <3 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR5 -> PB26 */
+	/omit-if-no-ref/ ecap0_out_pb26: ecap0_out_pb26 {
+		pinmux = <MSP_PINMUX(59, 16)>;
+		ti,xbar-out = <4 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR5 -> PB26 */
+	/omit-if-no-ref/ ecap1_out_pb26: ecap1_out_pb26 {
+		pinmux = <MSP_PINMUX(59, 16)>;
+		ti,xbar-out = <4 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR6 -> PB27 */
+	/omit-if-no-ref/ ecap0_out_pb27: ecap0_out_pb27 {
+		pinmux = <MSP_PINMUX(60, 16)>;
+		ti,xbar-out = <5 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR6 -> PB27 */
+	/omit-if-no-ref/ ecap1_out_pb27: ecap1_out_pb27 {
+		pinmux = <MSP_PINMUX(60, 16)>;
+		ti,xbar-out = <5 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR7 -> PB28 */
+	/omit-if-no-ref/ ecap0_out_pb28: ecap0_out_pb28 {
+		pinmux = <MSP_PINMUX(61, 16)>;
+		ti,xbar-out = <6 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR7 -> PB28 */
+	/omit-if-no-ref/ ecap1_out_pb28: ecap1_out_pb28 {
+		pinmux = <MSP_PINMUX(61, 16)>;
+		ti,xbar-out = <6 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR8 -> PB29 */
+	/omit-if-no-ref/ ecap0_out_pb29: ecap0_out_pb29 {
+		pinmux = <MSP_PINMUX(62, 16)>;
+		ti,xbar-out = <7 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR8 -> PB29 */
+	/omit-if-no-ref/ ecap1_out_pb29: ecap1_out_pb29 {
+		pinmux = <MSP_PINMUX(62, 16)>;
+		ti,xbar-out = <7 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR1 -> PB30 */
+	/omit-if-no-ref/ ecap0_out_pb30: ecap0_out_pb30 {
+		pinmux = <MSP_PINMUX(63, 16)>;
+		ti,xbar-out = <0 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR1 -> PB30 */
+	/omit-if-no-ref/ ecap1_out_pb30: ecap1_out_pb30 {
+		pinmux = <MSP_PINMUX(63, 16)>;
+		ti,xbar-out = <0 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR2 -> PB31 */
+	/omit-if-no-ref/ ecap0_out_pb31: ecap0_out_pb31 {
+		pinmux = <MSP_PINMUX(64, 16)>;
+		ti,xbar-out = <1 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR2 -> PB31 */
+	/omit-if-no-ref/ ecap1_out_pb31: ecap1_out_pb31 {
+		pinmux = <MSP_PINMUX(64, 16)>;
+		ti,xbar-out = <1 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR1 -> PC0 */
+	/omit-if-no-ref/ ecap0_out_pc0: ecap0_out_pc0 {
+		pinmux = <MSP_PINMUX(65, 16)>;
+		ti,xbar-out = <0 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR1 -> PC0 */
+	/omit-if-no-ref/ ecap1_out_pc0: ecap1_out_pc0 {
+		pinmux = <MSP_PINMUX(65, 16)>;
+		ti,xbar-out = <0 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR2 -> PC1 */
+	/omit-if-no-ref/ ecap0_out_pc1: ecap0_out_pc1 {
+		pinmux = <MSP_PINMUX(66, 16)>;
+		ti,xbar-out = <1 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR2 -> PC1 */
+	/omit-if-no-ref/ ecap1_out_pc1: ecap1_out_pc1 {
+		pinmux = <MSP_PINMUX(66, 16)>;
+		ti,xbar-out = <1 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR1 -> PC2 */
+	/omit-if-no-ref/ ecap0_out_pc2: ecap0_out_pc2 {
+		pinmux = <MSP_PINMUX(67, 16)>;
+		ti,xbar-out = <0 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR1 -> PC2 */
+	/omit-if-no-ref/ ecap1_out_pc2: ecap1_out_pc2 {
+		pinmux = <MSP_PINMUX(67, 16)>;
+		ti,xbar-out = <0 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR2 -> PC3 */
+	/omit-if-no-ref/ ecap0_out_pc3: ecap0_out_pc3 {
+		pinmux = <MSP_PINMUX(68, 16)>;
+		ti,xbar-out = <1 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR2 -> PC3 */
+	/omit-if-no-ref/ ecap1_out_pc3: ecap1_out_pc3 {
+		pinmux = <MSP_PINMUX(68, 16)>;
+		ti,xbar-out = <1 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR3 -> PC4 */
+	/omit-if-no-ref/ ecap0_out_pc4: ecap0_out_pc4 {
+		pinmux = <MSP_PINMUX(69, 16)>;
+		ti,xbar-out = <2 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR3 -> PC4 */
+	/omit-if-no-ref/ ecap1_out_pc4: ecap1_out_pc4 {
+		pinmux = <MSP_PINMUX(69, 16)>;
+		ti,xbar-out = <2 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR4 -> PC5 */
+	/omit-if-no-ref/ ecap0_out_pc5: ecap0_out_pc5 {
+		pinmux = <MSP_PINMUX(70, 16)>;
+		ti,xbar-out = <3 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR4 -> PC5 */
+	/omit-if-no-ref/ ecap1_out_pc5: ecap1_out_pc5 {
+		pinmux = <MSP_PINMUX(70, 16)>;
+		ti,xbar-out = <3 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR5 -> PC6 */
+	/omit-if-no-ref/ ecap0_out_pc6: ecap0_out_pc6 {
+		pinmux = <MSP_PINMUX(71, 16)>;
+		ti,xbar-out = <4 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR5 -> PC6 */
+	/omit-if-no-ref/ ecap1_out_pc6: ecap1_out_pc6 {
+		pinmux = <MSP_PINMUX(71, 16)>;
+		ti,xbar-out = <4 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR1 -> PC7 */
+	/omit-if-no-ref/ ecap0_out_pc7: ecap0_out_pc7 {
+		pinmux = <MSP_PINMUX(72, 16)>;
+		ti,xbar-out = <0 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR1 -> PC7 */
+	/omit-if-no-ref/ ecap1_out_pc7: ecap1_out_pc7 {
+		pinmux = <MSP_PINMUX(72, 16)>;
+		ti,xbar-out = <0 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR2 -> PC8 */
+	/omit-if-no-ref/ ecap0_out_pc8: ecap0_out_pc8 {
+		pinmux = <MSP_PINMUX(73, 16)>;
+		ti,xbar-out = <1 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR2 -> PC8 */
+	/omit-if-no-ref/ ecap1_out_pc8: ecap1_out_pc8 {
+		pinmux = <MSP_PINMUX(73, 16)>;
+		ti,xbar-out = <1 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR3 -> PC9 */
+	/omit-if-no-ref/ ecap0_out_pc9: ecap0_out_pc9 {
+		pinmux = <MSP_PINMUX(74, 16)>;
+		ti,xbar-out = <2 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR3 -> PC9 */
+	/omit-if-no-ref/ ecap1_out_pc9: ecap1_out_pc9 {
+		pinmux = <MSP_PINMUX(74, 16)>;
+		ti,xbar-out = <2 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR4 -> PC10 */
+	/omit-if-no-ref/ ecap0_out_pc10: ecap0_out_pc10 {
+		pinmux = <MSP_PINMUX(75, 16)>;
+		ti,xbar-out = <3 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR4 -> PC10 */
+	/omit-if-no-ref/ ecap1_out_pc10: ecap1_out_pc10 {
+		pinmux = <MSP_PINMUX(75, 16)>;
+		ti,xbar-out = <3 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR5 -> PC11 */
+	/omit-if-no-ref/ ecap0_out_pc11: ecap0_out_pc11 {
+		pinmux = <MSP_PINMUX(76, 16)>;
+		ti,xbar-out = <4 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR5 -> PC11 */
+	/omit-if-no-ref/ ecap1_out_pc11: ecap1_out_pc11 {
+		pinmux = <MSP_PINMUX(76, 16)>;
+		ti,xbar-out = <4 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR6 -> PC12 */
+	/omit-if-no-ref/ ecap0_out_pc12: ecap0_out_pc12 {
+		pinmux = <MSP_PINMUX(77, 16)>;
+		ti,xbar-out = <5 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR6 -> PC12 */
+	/omit-if-no-ref/ ecap1_out_pc12: ecap1_out_pc12 {
+		pinmux = <MSP_PINMUX(77, 16)>;
+		ti,xbar-out = <5 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR7 -> PC13 */
+	/omit-if-no-ref/ ecap0_out_pc13: ecap0_out_pc13 {
+		pinmux = <MSP_PINMUX(78, 16)>;
+		ti,xbar-out = <6 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR7 -> PC13 */
+	/omit-if-no-ref/ ecap1_out_pc13: ecap1_out_pc13 {
+		pinmux = <MSP_PINMUX(78, 16)>;
+		ti,xbar-out = <6 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR8 -> PC14 */
+	/omit-if-no-ref/ ecap0_out_pc14: ecap0_out_pc14 {
+		pinmux = <MSP_PINMUX(79, 16)>;
+		ti,xbar-out = <7 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR8 -> PC14 */
+	/omit-if-no-ref/ ecap1_out_pc14: ecap1_out_pc14 {
+		pinmux = <MSP_PINMUX(79, 16)>;
+		ti,xbar-out = <7 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR1 -> PC15 */
+	/omit-if-no-ref/ ecap0_out_pc15: ecap0_out_pc15 {
+		pinmux = <MSP_PINMUX(80, 16)>;
+		ti,xbar-out = <0 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR1 -> PC15 */
+	/omit-if-no-ref/ ecap1_out_pc15: ecap1_out_pc15 {
+		pinmux = <MSP_PINMUX(80, 16)>;
+		ti,xbar-out = <0 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR7 -> PC18 */
+	/omit-if-no-ref/ ecap0_out_pc18: ecap0_out_pc18 {
+		pinmux = <MSP_PINMUX(83, 16)>;
+		ti,xbar-out = <6 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR7 -> PC18 */
+	/omit-if-no-ref/ ecap1_out_pc18: ecap1_out_pc18 {
+		pinmux = <MSP_PINMUX(83, 16)>;
+		ti,xbar-out = <6 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR3 -> PC19 */
+	/omit-if-no-ref/ ecap0_out_pc19: ecap0_out_pc19 {
+		pinmux = <MSP_PINMUX(84, 16)>;
+		ti,xbar-out = <2 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR3 -> PC19 */
+	/omit-if-no-ref/ ecap1_out_pc19: ecap1_out_pc19 {
+		pinmux = <MSP_PINMUX(84, 16)>;
+		ti,xbar-out = <2 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR4 -> PC20 */
+	/omit-if-no-ref/ ecap0_out_pc20: ecap0_out_pc20 {
+		pinmux = <MSP_PINMUX(85, 16)>;
+		ti,xbar-out = <3 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR4 -> PC20 */
+	/omit-if-no-ref/ ecap1_out_pc20: ecap1_out_pc20 {
+		pinmux = <MSP_PINMUX(85, 16)>;
+		ti,xbar-out = <3 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR5 -> PC21 */
+	/omit-if-no-ref/ ecap0_out_pc21: ecap0_out_pc21 {
+		pinmux = <MSP_PINMUX(86, 16)>;
+		ti,xbar-out = <4 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR5 -> PC21 */
+	/omit-if-no-ref/ ecap1_out_pc21: ecap1_out_pc21 {
+		pinmux = <MSP_PINMUX(86, 16)>;
+		ti,xbar-out = <4 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR2 -> PC22 */
+	/omit-if-no-ref/ ecap0_out_pc22: ecap0_out_pc22 {
+		pinmux = <MSP_PINMUX(87, 16)>;
+		ti,xbar-out = <1 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR2 -> PC22 */
+	/omit-if-no-ref/ ecap1_out_pc22: ecap1_out_pc22 {
+		pinmux = <MSP_PINMUX(87, 16)>;
+		ti,xbar-out = <1 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR6 -> PC23 */
+	/omit-if-no-ref/ ecap0_out_pc23: ecap0_out_pc23 {
+		pinmux = <MSP_PINMUX(88, 16)>;
+		ti,xbar-out = <5 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR6 -> PC23 */
+	/omit-if-no-ref/ ecap1_out_pc23: ecap1_out_pc23 {
+		pinmux = <MSP_PINMUX(88, 16)>;
+		ti,xbar-out = <5 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR7 -> PC24 */
+	/omit-if-no-ref/ ecap0_out_pc24: ecap0_out_pc24 {
+		pinmux = <MSP_PINMUX(89, 16)>;
+		ti,xbar-out = <6 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR7 -> PC24 */
+	/omit-if-no-ref/ ecap1_out_pc24: ecap1_out_pc24 {
+		pinmux = <MSP_PINMUX(89, 16)>;
+		ti,xbar-out = <6 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR8 -> PC25 */
+	/omit-if-no-ref/ ecap0_out_pc25: ecap0_out_pc25 {
+		pinmux = <MSP_PINMUX(90, 16)>;
+		ti,xbar-out = <7 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR8 -> PC25 */
+	/omit-if-no-ref/ ecap1_out_pc25: ecap1_out_pc25 {
+		pinmux = <MSP_PINMUX(90, 16)>;
+		ti,xbar-out = <7 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR1 -> PC26 */
+	/omit-if-no-ref/ ecap0_out_pc26: ecap0_out_pc26 {
+		pinmux = <MSP_PINMUX(91, 16)>;
+		ti,xbar-out = <0 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR1 -> PC26 */
+	/omit-if-no-ref/ ecap1_out_pc26: ecap1_out_pc26 {
+		pinmux = <MSP_PINMUX(91, 16)>;
+		ti,xbar-out = <0 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR4 -> PC27 */
+	/omit-if-no-ref/ ecap0_out_pc27: ecap0_out_pc27 {
+		pinmux = <MSP_PINMUX(92, 16)>;
+		ti,xbar-out = <3 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR4 -> PC27 */
+	/omit-if-no-ref/ ecap1_out_pc27: ecap1_out_pc27 {
+		pinmux = <MSP_PINMUX(92, 16)>;
+		ti,xbar-out = <3 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR5 -> PC28 */
+	/omit-if-no-ref/ ecap0_out_pc28: ecap0_out_pc28 {
+		pinmux = <MSP_PINMUX(93, 16)>;
+		ti,xbar-out = <4 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR5 -> PC28 */
+	/omit-if-no-ref/ ecap1_out_pc28: ecap1_out_pc28 {
+		pinmux = <MSP_PINMUX(93, 16)>;
+		ti,xbar-out = <4 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR6 -> PC29 */
+	/omit-if-no-ref/ ecap0_out_pc29: ecap0_out_pc29 {
+		pinmux = <MSP_PINMUX(94, 16)>;
+		ti,xbar-out = <5 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR6 -> PC29 */
+	/omit-if-no-ref/ ecap1_out_pc29: ecap1_out_pc29 {
+		pinmux = <MSP_PINMUX(94, 16)>;
+		ti,xbar-out = <5 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR7 -> PC30 */
+	/omit-if-no-ref/ ecap0_out_pc30: ecap0_out_pc30 {
+		pinmux = <MSP_PINMUX(95, 16)>;
+		ti,xbar-out = <6 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR7 -> PC30 */
+	/omit-if-no-ref/ ecap1_out_pc30: ecap1_out_pc30 {
+		pinmux = <MSP_PINMUX(95, 16)>;
+		ti,xbar-out = <6 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR8 -> PC31 */
+	/omit-if-no-ref/ ecap0_out_pc31: ecap0_out_pc31 {
+		pinmux = <MSP_PINMUX(96, 16)>;
+		ti,xbar-out = <7 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR8 -> PC31 */
+	/omit-if-no-ref/ ecap1_out_pc31: ecap1_out_pc31 {
+		pinmux = <MSP_PINMUX(96, 16)>;
+		ti,xbar-out = <7 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR5 -> PD0 */
+	/omit-if-no-ref/ ecap0_out_pd0: ecap0_out_pd0 {
+		pinmux = <MSP_PINMUX(97, 16)>;
+		ti,xbar-out = <4 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR5 -> PD0 */
+	/omit-if-no-ref/ ecap1_out_pd0: ecap1_out_pd0 {
+		pinmux = <MSP_PINMUX(97, 16)>;
+		ti,xbar-out = <4 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR6 -> PD1 */
+	/omit-if-no-ref/ ecap0_out_pd1: ecap0_out_pd1 {
+		pinmux = <MSP_PINMUX(98, 16)>;
+		ti,xbar-out = <5 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR6 -> PD1 */
+	/omit-if-no-ref/ ecap1_out_pd1: ecap1_out_pd1 {
+		pinmux = <MSP_PINMUX(98, 16)>;
+		ti,xbar-out = <5 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR7 -> PD2 */
+	/omit-if-no-ref/ ecap0_out_pd2: ecap0_out_pd2 {
+		pinmux = <MSP_PINMUX(99, 16)>;
+		ti,xbar-out = <6 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR7 -> PD2 */
+	/omit-if-no-ref/ ecap1_out_pd2: ecap1_out_pd2 {
+		pinmux = <MSP_PINMUX(99, 16)>;
+		ti,xbar-out = <6 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR8 -> PD3 */
+	/omit-if-no-ref/ ecap0_out_pd3: ecap0_out_pd3 {
+		pinmux = <MSP_PINMUX(100, 16)>;
+		ti,xbar-out = <7 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR8 -> PD3 */
+	/omit-if-no-ref/ ecap1_out_pd3: ecap1_out_pd3 {
+		pinmux = <MSP_PINMUX(100, 16)>;
+		ti,xbar-out = <7 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR1 -> PD4 */
+	/omit-if-no-ref/ ecap0_out_pd4: ecap0_out_pd4 {
+		pinmux = <MSP_PINMUX(101, 16)>;
+		ti,xbar-out = <0 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR1 -> PD4 */
+	/omit-if-no-ref/ ecap1_out_pd4: ecap1_out_pd4 {
+		pinmux = <MSP_PINMUX(101, 16)>;
+		ti,xbar-out = <0 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR5 -> PD5 */
+	/omit-if-no-ref/ ecap0_out_pd5: ecap0_out_pd5 {
+		pinmux = <MSP_PINMUX(102, 16)>;
+		ti,xbar-out = <4 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR5 -> PD5 */
+	/omit-if-no-ref/ ecap1_out_pd5: ecap1_out_pd5 {
+		pinmux = <MSP_PINMUX(102, 16)>;
+		ti,xbar-out = <4 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR6 -> PD6 */
+	/omit-if-no-ref/ ecap0_out_pd6: ecap0_out_pd6 {
+		pinmux = <MSP_PINMUX(103, 16)>;
+		ti,xbar-out = <5 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR6 -> PD6 */
+	/omit-if-no-ref/ ecap1_out_pd6: ecap1_out_pd6 {
+		pinmux = <MSP_PINMUX(103, 16)>;
+		ti,xbar-out = <5 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR7 -> PD7 */
+	/omit-if-no-ref/ ecap0_out_pd7: ecap0_out_pd7 {
+		pinmux = <MSP_PINMUX(104, 16)>;
+		ti,xbar-out = <6 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR7 -> PD7 */
+	/omit-if-no-ref/ ecap1_out_pd7: ecap1_out_pd7 {
+		pinmux = <MSP_PINMUX(104, 16)>;
+		ti,xbar-out = <6 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR8 -> PD8 */
+	/omit-if-no-ref/ ecap0_out_pd8: ecap0_out_pd8 {
+		pinmux = <MSP_PINMUX(105, 16)>;
+		ti,xbar-out = <7 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR8 -> PD8 */
+	/omit-if-no-ref/ ecap1_out_pd8: ecap1_out_pd8 {
+		pinmux = <MSP_PINMUX(105, 16)>;
+		ti,xbar-out = <7 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR1 -> PD9 */
+	/omit-if-no-ref/ ecap0_out_pd9: ecap0_out_pd9 {
+		pinmux = <MSP_PINMUX(106, 16)>;
+		ti,xbar-out = <0 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR1 -> PD9 */
+	/omit-if-no-ref/ ecap1_out_pd9: ecap1_out_pd9 {
+		pinmux = <MSP_PINMUX(106, 16)>;
+		ti,xbar-out = <0 1 5>;
+	};
+
+	/* ECAP0_OUT -> OUTPUTXBAR8 -> PD11 */
+	/omit-if-no-ref/ ecap0_out_pd11: ecap0_out_pd11 {
+		pinmux = <MSP_PINMUX(108, 16)>;
+		ti,xbar-out = <7 1 4>;
+	};
+
+	/* ECAP1_OUT -> OUTPUTXBAR8 -> PD11 */
+	/omit-if-no-ref/ ecap1_out_pd11: ecap1_out_pd11 {
+		pinmux = <MSP_PINMUX(108, 16)>;
+		ti,xbar-out = <7 1 5>;
+	};
+
+	/* PA0 -> GPIO0 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pa0: inputxbar_pa0 {
+		pinmux = <MSP_PINMUX(1, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <0>;
+	};
+
+	/* PA1 -> GPIO1 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pa1: inputxbar_pa1 {
+		pinmux = <MSP_PINMUX(2, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <1>;
+	};
+
+	/* PA2 -> GPIO2 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pa2: inputxbar_pa2 {
+		pinmux = <MSP_PINMUX(3, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <2>;
+	};
+
+	/* PA3 -> GPIO3 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pa3: inputxbar_pa3 {
+		pinmux = <MSP_PINMUX(4, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <3>;
+	};
+
+	/* PA4 -> GPIO4 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pa4: inputxbar_pa4 {
+		pinmux = <MSP_PINMUX(5, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <4>;
+	};
+
+	/* PA5 -> GPIO5 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pa5: inputxbar_pa5 {
+		pinmux = <MSP_PINMUX(6, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <5>;
+	};
+
+	/* PA6 -> GPIO6 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pa6: inputxbar_pa6 {
+		pinmux = <MSP_PINMUX(7, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <6>;
+	};
+
+	/* PA7 -> GPIO7 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pa7: inputxbar_pa7 {
+		pinmux = <MSP_PINMUX(8, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <7>;
+	};
+
+	/* PA8 -> GPIO8 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pa8: inputxbar_pa8 {
+		pinmux = <MSP_PINMUX(9, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <8>;
+	};
+
+	/* PA9 -> GPIO9 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pa9: inputxbar_pa9 {
+		pinmux = <MSP_PINMUX(10, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <9>;
+	};
+
+	/* PA10 -> GPIO10 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pa10: inputxbar_pa10 {
+		pinmux = <MSP_PINMUX(11, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <10>;
+	};
+
+	/* PA11 -> GPIO11 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pa11: inputxbar_pa11 {
+		pinmux = <MSP_PINMUX(12, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <11>;
+	};
+
+	/* PA12 -> GPIO12 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pa12: inputxbar_pa12 {
+		pinmux = <MSP_PINMUX(13, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <12>;
+	};
+
+	/* PA13 -> GPIO13 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pa13: inputxbar_pa13 {
+		pinmux = <MSP_PINMUX(14, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <13>;
+	};
+
+	/* PA14 -> GPIO14 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pa14: inputxbar_pa14 {
+		pinmux = <MSP_PINMUX(15, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <14>;
+	};
+
+	/* PA15 -> GPIO15 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pa15: inputxbar_pa15 {
+		pinmux = <MSP_PINMUX(16, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <15>;
+	};
+
+	/* PA16 -> GPIO16 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pa16: inputxbar_pa16 {
+		pinmux = <MSP_PINMUX(17, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <16>;
+	};
+
+	/* PA17 -> GPIO17 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pa17: inputxbar_pa17 {
+		pinmux = <MSP_PINMUX(18, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <17>;
+	};
+
+	/* PA18 -> GPIO18 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pa18: inputxbar_pa18 {
+		pinmux = <MSP_PINMUX(19, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <18>;
+	};
+
+	/* PA19 -> GPIO19 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pa19: inputxbar_pa19 {
+		pinmux = <MSP_PINMUX(20, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <19>;
+	};
+
+	/* PA20 -> GPIO20 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pa20: inputxbar_pa20 {
+		pinmux = <MSP_PINMUX(21, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <20>;
+	};
+
+	/* PA21 -> GPIO21 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pa21: inputxbar_pa21 {
+		pinmux = <MSP_PINMUX(22, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <21>;
+	};
+
+	/* PA22 -> GPIO22 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pa22: inputxbar_pa22 {
+		pinmux = <MSP_PINMUX(23, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <22>;
+	};
+
+	/* PA23 -> GPIO23 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pa23: inputxbar_pa23 {
+		pinmux = <MSP_PINMUX(24, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <23>;
+	};
+
+	/* PA24 -> GPIO24 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pa24: inputxbar_pa24 {
+		pinmux = <MSP_PINMUX(25, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <24>;
+	};
+
+	/* PA25 -> GPIO25 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pa25: inputxbar_pa25 {
+		pinmux = <MSP_PINMUX(26, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <25>;
+	};
+
+	/* PA26 -> GPIO26 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pa26: inputxbar_pa26 {
+		pinmux = <MSP_PINMUX(27, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <26>;
+	};
+
+	/* PA27 -> GPIO27 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pa27: inputxbar_pa27 {
+		pinmux = <MSP_PINMUX(28, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <27>;
+	};
+
+	/* PA28 -> GPIO28 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pa28: inputxbar_pa28 {
+		pinmux = <MSP_PINMUX(29, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <28>;
+	};
+
+	/* PA29 -> GPIO29 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pa29: inputxbar_pa29 {
+		pinmux = <MSP_PINMUX(30, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <29>;
+	};
+
+	/* PA30 -> GPIO30 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pa30: inputxbar_pa30 {
+		pinmux = <MSP_PINMUX(31, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <30>;
+	};
+
+	/* PA31 -> GPIO31 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pa31: inputxbar_pa31 {
+		pinmux = <MSP_PINMUX(32, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <31>;
+	};
+
+	/* PB0 -> GPIO32 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pb0: inputxbar_pb0 {
+		pinmux = <MSP_PINMUX(33, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <32>;
+	};
+
+	/* PB1 -> GPIO33 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pb1: inputxbar_pb1 {
+		pinmux = <MSP_PINMUX(34, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <33>;
+	};
+
+	/* PB2 -> GPIO34 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pb2: inputxbar_pb2 {
+		pinmux = <MSP_PINMUX(35, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <34>;
+	};
+
+	/* PB3 -> GPIO35 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pb3: inputxbar_pb3 {
+		pinmux = <MSP_PINMUX(36, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <35>;
+	};
+
+	/* PB4 -> GPIO36 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pb4: inputxbar_pb4 {
+		pinmux = <MSP_PINMUX(37, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <36>;
+	};
+
+	/* PB5 -> GPIO37 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pb5: inputxbar_pb5 {
+		pinmux = <MSP_PINMUX(38, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <37>;
+	};
+
+	/* PB6 -> GPIO38 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pb6: inputxbar_pb6 {
+		pinmux = <MSP_PINMUX(39, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <38>;
+	};
+
+	/* PB7 -> GPIO39 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pb7: inputxbar_pb7 {
+		pinmux = <MSP_PINMUX(40, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <39>;
+	};
+
+	/* PB8 -> GPIO40 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pb8: inputxbar_pb8 {
+		pinmux = <MSP_PINMUX(41, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <40>;
+	};
+
+	/* PB9 -> GPIO41 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pb9: inputxbar_pb9 {
+		pinmux = <MSP_PINMUX(42, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <41>;
+	};
+
+	/* PB10 -> GPIO42 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pb10: inputxbar_pb10 {
+		pinmux = <MSP_PINMUX(43, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <42>;
+	};
+
+	/* PB11 -> GPIO43 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pb11: inputxbar_pb11 {
+		pinmux = <MSP_PINMUX(44, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <43>;
+	};
+
+	/* PB12 -> GPIO44 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pb12: inputxbar_pb12 {
+		pinmux = <MSP_PINMUX(45, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <44>;
+	};
+
+	/* PB13 -> GPIO45 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pb13: inputxbar_pb13 {
+		pinmux = <MSP_PINMUX(46, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <45>;
+	};
+
+	/* PB14 -> GPIO46 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pb14: inputxbar_pb14 {
+		pinmux = <MSP_PINMUX(47, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <46>;
+	};
+
+	/* PB15 -> GPIO47 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pb15: inputxbar_pb15 {
+		pinmux = <MSP_PINMUX(48, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <47>;
+	};
+
+	/* PB16 -> GPIO48 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pb16: inputxbar_pb16 {
+		pinmux = <MSP_PINMUX(49, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <48>;
+	};
+
+	/* PB17 -> GPIO49 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pb17: inputxbar_pb17 {
+		pinmux = <MSP_PINMUX(50, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <49>;
+	};
+
+	/* PB18 -> GPIO50 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pb18: inputxbar_pb18 {
+		pinmux = <MSP_PINMUX(51, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <50>;
+	};
+
+	/* PB19 -> GPIO51 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pb19: inputxbar_pb19 {
+		pinmux = <MSP_PINMUX(52, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <51>;
+	};
+
+	/* PB20 -> GPIO52 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pb20: inputxbar_pb20 {
+		pinmux = <MSP_PINMUX(53, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <52>;
+	};
+
+	/* PB21 -> GPIO53 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pb21: inputxbar_pb21 {
+		pinmux = <MSP_PINMUX(54, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <53>;
+	};
+
+	/* PB22 -> GPIO54 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pb22: inputxbar_pb22 {
+		pinmux = <MSP_PINMUX(55, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <54>;
+	};
+
+	/* PB23 -> GPIO55 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pb23: inputxbar_pb23 {
+		pinmux = <MSP_PINMUX(56, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <55>;
+	};
+
+	/* PB24 -> GPIO56 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pb24: inputxbar_pb24 {
+		pinmux = <MSP_PINMUX(57, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <56>;
+	};
+
+	/* PB25 -> GPIO57 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pb25: inputxbar_pb25 {
+		pinmux = <MSP_PINMUX(58, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <57>;
+	};
+
+	/* PB26 -> GPIO58 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pb26: inputxbar_pb26 {
+		pinmux = <MSP_PINMUX(59, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <58>;
+	};
+
+	/* PB27 -> GPIO59 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pb27: inputxbar_pb27 {
+		pinmux = <MSP_PINMUX(60, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <59>;
+	};
+
+	/* PB28 -> GPIO60 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pb28: inputxbar_pb28 {
+		pinmux = <MSP_PINMUX(61, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <60>;
+	};
+
+	/* PB29 -> GPIO61 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pb29: inputxbar_pb29 {
+		pinmux = <MSP_PINMUX(62, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <61>;
+	};
+
+	/* PB30 -> GPIO62 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pb30: inputxbar_pb30 {
+		pinmux = <MSP_PINMUX(63, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <62>;
+	};
+
+	/* PB31 -> GPIO63 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pb31: inputxbar_pb31 {
+		pinmux = <MSP_PINMUX(64, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <63>;
+	};
+
+	/* PC0 -> GPIO64 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pc0: inputxbar_pc0 {
+		pinmux = <MSP_PINMUX(65, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <64>;
+	};
+
+	/* PC1 -> GPIO65 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pc1: inputxbar_pc1 {
+		pinmux = <MSP_PINMUX(66, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <65>;
+	};
+
+	/* PC2 -> GPIO66 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pc2: inputxbar_pc2 {
+		pinmux = <MSP_PINMUX(67, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <66>;
+	};
+
+	/* PC3 -> GPIO67 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pc3: inputxbar_pc3 {
+		pinmux = <MSP_PINMUX(68, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <67>;
+	};
+
+	/* PC4 -> GPIO68 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pc4: inputxbar_pc4 {
+		pinmux = <MSP_PINMUX(69, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <68>;
+	};
+
+	/* PC5 -> GPIO69 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pc5: inputxbar_pc5 {
+		pinmux = <MSP_PINMUX(70, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <69>;
+	};
+
+	/* PC6 -> GPIO70 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pc6: inputxbar_pc6 {
+		pinmux = <MSP_PINMUX(71, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <70>;
+	};
+
+	/* PC7 -> GPIO71 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pc7: inputxbar_pc7 {
+		pinmux = <MSP_PINMUX(72, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <71>;
+	};
+
+	/* PC8 -> GPIO72 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pc8: inputxbar_pc8 {
+		pinmux = <MSP_PINMUX(73, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <72>;
+	};
+
+	/* PC9 -> GPIO73 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pc9: inputxbar_pc9 {
+		pinmux = <MSP_PINMUX(74, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <73>;
+	};
+
+	/* PC10 -> GPIO74 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pc10: inputxbar_pc10 {
+		pinmux = <MSP_PINMUX(75, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <74>;
+	};
+
+	/* PC11 -> GPIO75 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pc11: inputxbar_pc11 {
+		pinmux = <MSP_PINMUX(76, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <75>;
+	};
+
+	/* PC12 -> GPIO76 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pc12: inputxbar_pc12 {
+		pinmux = <MSP_PINMUX(77, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <76>;
+	};
+
+	/* PC13 -> GPIO77 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pc13: inputxbar_pc13 {
+		pinmux = <MSP_PINMUX(78, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <77>;
+	};
+
+	/* PC14 -> GPIO78 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pc14: inputxbar_pc14 {
+		pinmux = <MSP_PINMUX(79, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <78>;
+	};
+
+	/* PC15 -> GPIO79 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pc15: inputxbar_pc15 {
+		pinmux = <MSP_PINMUX(80, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <79>;
+	};
+
+	/* PC18 -> GPIO82 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pc18: inputxbar_pc18 {
+		pinmux = <MSP_PINMUX(83, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <82>;
+	};
+
+	/* PC19 -> GPIO83 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pc19: inputxbar_pc19 {
+		pinmux = <MSP_PINMUX(84, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <83>;
+	};
+
+	/* PC20 -> GPIO84 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pc20: inputxbar_pc20 {
+		pinmux = <MSP_PINMUX(85, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <84>;
+	};
+
+	/* PC21 -> GPIO85 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pc21: inputxbar_pc21 {
+		pinmux = <MSP_PINMUX(86, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <85>;
+	};
+
+	/* PC22 -> GPIO86 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pc22: inputxbar_pc22 {
+		pinmux = <MSP_PINMUX(87, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <86>;
+	};
+
+	/* PC23 -> GPIO87 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pc23: inputxbar_pc23 {
+		pinmux = <MSP_PINMUX(88, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <87>;
+	};
+
+	/* PC24 -> GPIO88 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pc24: inputxbar_pc24 {
+		pinmux = <MSP_PINMUX(89, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <88>;
+	};
+
+	/* PC25 -> GPIO89 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pc25: inputxbar_pc25 {
+		pinmux = <MSP_PINMUX(90, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <89>;
+	};
+
+	/* PC26 -> GPIO90 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pc26: inputxbar_pc26 {
+		pinmux = <MSP_PINMUX(91, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <90>;
+	};
+
+	/* PC27 -> GPIO91 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pc27: inputxbar_pc27 {
+		pinmux = <MSP_PINMUX(92, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <91>;
+	};
+
+	/* PC28 -> GPIO92 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pc28: inputxbar_pc28 {
+		pinmux = <MSP_PINMUX(93, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <92>;
+	};
+
+	/* PC29 -> GPIO93 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pc29: inputxbar_pc29 {
+		pinmux = <MSP_PINMUX(94, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <93>;
+	};
+
+	/* PC30 -> GPIO94 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pc30: inputxbar_pc30 {
+		pinmux = <MSP_PINMUX(95, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <94>;
+	};
+
+	/* PC31 -> GPIO95 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pc31: inputxbar_pc31 {
+		pinmux = <MSP_PINMUX(96, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <95>;
+	};
+
+	/* PD0 -> GPIO96 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pd0: inputxbar_pd0 {
+		pinmux = <MSP_PINMUX(97, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <96>;
+	};
+
+	/* PD1 -> GPIO97 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pd1: inputxbar_pd1 {
+		pinmux = <MSP_PINMUX(98, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <97>;
+	};
+
+	/* PD2 -> GPIO98 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pd2: inputxbar_pd2 {
+		pinmux = <MSP_PINMUX(99, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <98>;
+	};
+
+	/* PD3 -> GPIO99 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pd3: inputxbar_pd3 {
+		pinmux = <MSP_PINMUX(100, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <99>;
+	};
+
+	/* PD4 -> GPIO100 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pd4: inputxbar_pd4 {
+		pinmux = <MSP_PINMUX(101, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <100>;
+	};
+
+	/* PD5 -> GPIO101 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pd5: inputxbar_pd5 {
+		pinmux = <MSP_PINMUX(102, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <101>;
+	};
+
+	/* PD6 -> GPIO102 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pd6: inputxbar_pd6 {
+		pinmux = <MSP_PINMUX(103, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <102>;
+	};
+
+	/* PD7 -> GPIO103 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pd7: inputxbar_pd7 {
+		pinmux = <MSP_PINMUX(104, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <103>;
+	};
+
+	/* PD8 -> GPIO104 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pd8: inputxbar_pd8 {
+		pinmux = <MSP_PINMUX(105, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <104>;
+	};
+
+	/* PD9 -> GPIO105 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pd9: inputxbar_pd9 {
+		pinmux = <MSP_PINMUX(106, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <105>;
+	};
+
+	/* PD11 -> GPIO107 -> Input X-BAR */
+	/omit-if-no-ref/ inputxbar_pd11: inputxbar_pd11 {
+		pinmux = <MSP_PINMUX(108, 1)>;
+		input-enable;
+		ti,xbar-in-gpio = <107>;
+	};
+};
