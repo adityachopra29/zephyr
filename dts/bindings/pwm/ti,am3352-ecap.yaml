@@ -44,6 +44,39 @@ properties:
     type: int
     description: Optional peripheral frequency to use if the clock is absent
 
+  ti,output-xbar:
+    type: phandle
+    description: |
+      Output X-BAR device routing this eCAP's APWM output to a pin
+      (crossbar-routed SoCs only, e.g. AM13E). The route itself is taken
+      from the "ti,xbar-out" metadata on the first entry of pinctrl-0.
+
+  ti,input-xbar:
+    type: phandle
+    description: |
+      Input X-BAR device routing a pin to this eCAP's capture input
+      (crossbar-routed SoCs only, e.g. AM13E). The routed GPIO is taken
+      from the "ti,xbar-in-gpio" metadata on the first entry of pinctrl-0.
+
+  ti,inputxbar-channel:
+    type: int
+    description: |
+      Input X-BAR channel this eCAP claims for its capture route. The
+      channel is also written to ECCTL0.INPUTSEL, whose source table maps
+      INPUTXBAR1-16 at indices 0-15, so only channels 0-15 are usable
+      here. The SoC devicetree assigns a collision-free default per
+      instance; boards only override on a conflict.
+
+  capture-gpios:
+    type: phandle-array
+    description: |
+      Pin captured by this eCAP, expressed as a GPIO (crossbar-routed
+      SoCs only, e.g. AM13E). The GPIO driver owns the pin: it powers the
+      port module and muxes the pad to the GPIO input the Input X-BAR
+      taps. The eCAP driver derives the Input X-BAR source from the pin's
+      GPIO number ("ti,xbar-gpio-base" of the port plus the pin index),
+      so no separate capture pinctrl entry is needed.
+
   "#pwm-cells":
     const: 3
 
