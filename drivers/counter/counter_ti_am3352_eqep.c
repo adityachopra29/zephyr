@@ -5,10 +5,16 @@
 
 #include <zephyr/drivers/counter/ti_am3352_eqep.h>
 #include <zephyr/irq.h>
+#include <zephyr/dt-bindings/mux/ti_am13e230_xbar_in.h>
+#include <zephyr/drivers/mux.h>
 #include <zephyr/drivers/pinctrl.h>
 #include <zephyr/drivers/counter.h>
 #include <zephyr/drivers/clock_control.h>
 #include <zephyr/logging/log.h>
+
+#ifdef CONFIG_CLOCK_CONTROL_MSPM0
+#include <zephyr/drivers/clock_control/mspm0_clock_control.h>
+#endif
 
 LOG_MODULE_REGISTER(ti_eqep);
 
@@ -39,6 +45,9 @@ struct ti_eqep_regs {
 	uint8_t RESERVED_4[0x4];    /**< Reserved, offset: 0x3A - 0x3E */
 	volatile uint16_t QCTLAT;   /**< QEP Capture Timer Latch Register, offset: 0x3E */
 	volatile uint16_t QCPRDLAT; /**< QEP Capture Period Latch Register, offset: 0x40 */
+	uint8_t RESERVED_5[0x2A];   /**< Reserved, offset: 0x42 - 0x6C */
+	/** QEP Source Select Register, offset: 0x6C (crossbar-routed SoCs only, e.g. AM13E) */
+	volatile uint32_t QEPSRCSEL;
 };
 
 /* Quadrature Decoder Control Register */
@@ -70,6 +79,11 @@ struct ti_eqep_regs {
 #define TI_EQEP_QCAPCTL_CCPS GENMASK(6, 4)
 #define TI_EQEP_QCAPCTL_UPPS GENMASK(3, 0)
 
+/* QEP Source Select Register: 0 selects the Input X-BAR */
+#define TI_EQEP_QEPSRCSEL_QEPASEL GENMASK(3, 0)
+#define TI_EQEP_QEPSRCSEL_QEPBSEL GENMASK(7, 4)
+#define TI_EQEP_QEPSRCSEL_QEPISEL GENMASK(11, 8)
+
 /* Interrupt Types - used in multiple registers */
 #define TI_EQEP_INT_UTOI BIT(11) /* Timeout Event */
 #define TI_EQEP_INT_IELI BIT(10) /* Index Event */
@@ -84,6 +98,14 @@ struct ti_eqep_regs {
 #define DEV_DATA(dev) ((struct ti_eqep_data *)(dev)->data)
 #define DEV_REGS(dev) ((struct ti_eqep_regs *)DEVICE_MMIO_NAMED_GET(dev, base))
 
+/* Input X-BAR route for one pinctrl-0 entry; ctrl is NULL for entries
+ * that carry no "ti,xbar-in-gpio" metadata.
+ */
+struct ti_eqep_in_route {
+	const struct mux_control *ctrl;
+	uint32_t state;
+};
+
 struct ti_eqep_cfg {
 	struct counter_config_info info;
 
@@ -92,6 +114,9 @@ struct ti_eqep_cfg {
 	clock_control_subsys_t clock_subsys;
 	const struct pinctrl_dev_config *pcfg;
 	void (*irq_config_func)();
+	const struct device *in_xbar;
+	const struct ti_eqep_in_route *in_routes;
+	size_t num_in_routes;
 };
 
 struct ti_eqep_data {
@@ -415,6 +440,30 @@ static int ti_eqep_init(const struct device *dev)
 		return ret;
 	}
 
+	if (cfg->in_xbar != NULL) {
+		if (!device_is_ready(cfg->in_xbar)) {
+			LOG_ERR("input xbar not ready");
+			return -ENODEV;
+		}
+
+		for (size_t i = 0; i < cfg->num_in_routes; i++) {
+			const struct ti_eqep_in_route *route = &cfg->in_routes[i];
+
+			if (route->ctrl == NULL) {
+				continue;
+			}
+
+			ret = mux_control_set(cfg->in_xbar, route->ctrl, route->state);
+			if (ret < 0) {
+				LOG_ERR("failed to route input %zu: %d", i, ret);
+				return ret;
+			}
+		}
+
+		regs->QEPSRCSEL &= ~(TI_EQEP_QEPSRCSEL_QEPASEL | TI_EQEP_QEPSRCSEL_QEPBSEL |
+				     TI_EQEP_QEPSRCSEL_QEPISEL);
+	}
+
 	/* irq connect */
 	cfg->irq_config_func();
 
@@ -435,7 +484,13 @@ static void ti_eqep_isr(const struct device *dev)
 	struct ti_eqep_regs *regs = DEV_REGS(dev);
 	struct ti_eqep_data *data = DEV_DATA(dev);
 	uint16_t flg = regs->INTFLG;
+	uint16_t unknown =
+		flg & ~(TI_EQEP_INT_PCOI | TI_EQEP_INT_PCUI | TI_EQEP_INT_PCMI | TI_EQEP_INT_SELI |
+			TI_EQEP_INT_IELI | TI_EQEP_INT_UTOI | TI_EQEP_INT_GLOB);
 
+	/* Several events can be pending at once (e.g. a unit timeout landing
+	 * on a counter wrap), so every flag is serviced on each entry.
+	 */
 	if (flg & (TI_EQEP_INT_PCOI | TI_EQEP_INT_PCUI)) {
 		if (data->top_callback) {
 			data->top_callback(dev, data->top_user_data);
@@ -443,7 +498,9 @@ static void ti_eqep_isr(const struct device *dev)
 
 		/* clear overflow/underflow */
 		regs->INTCLR |= (TI_EQEP_INT_PCOI | TI_EQEP_INT_PCUI);
-	} else if (flg & TI_EQEP_INT_PCMI) {
+	}
+
+	if (flg & TI_EQEP_INT_PCMI) {
 		enum ti_eqep_alarm_channel chan = TI_EQEP_ALARM_CHAN_COMPARE;
 		counter_alarm_callback_t cb = data->alarm_callback[chan];
 		void *user_data = data->alarm_user_data[chan];
@@ -460,7 +517,9 @@ static void ti_eqep_isr(const struct device *dev)
 
 		/* clear compare interrupt */
 		regs->INTCLR |= TI_EQEP_INT_PCMI;
-	} else if (flg & TI_EQEP_INT_SELI) {
+	}
+
+	if (flg & TI_EQEP_INT_SELI) {
 		enum ti_eqep_alarm_channel chan = TI_EQEP_ALARM_CHAN_STROBE;
 		counter_alarm_callback_t cb = data->alarm_callback[chan];
 		void *user_data = data->alarm_user_data[chan];
@@ -474,7 +533,9 @@ static void ti_eqep_isr(const struct device *dev)
 
 		/* clear strobe interrupt */
 		regs->INTCLR |= TI_EQEP_INT_SELI;
-	} else if (flg & TI_EQEP_INT_IELI) {
+	}
+
+	if (flg & TI_EQEP_INT_IELI) {
 		enum ti_eqep_alarm_channel chan = TI_EQEP_ALARM_CHAN_INDEX;
 		counter_alarm_callback_t cb = data->alarm_callback[chan];
 		void *user_data = data->alarm_user_data[chan];
@@ -488,7 +549,9 @@ static void ti_eqep_isr(const struct device *dev)
 
 		/* clear index interrupt */
 		regs->INTCLR |= TI_EQEP_INT_IELI;
-	} else if (flg & TI_EQEP_INT_UTOI) {
+	}
+
+	if (flg & TI_EQEP_INT_UTOI) {
 		enum ti_eqep_alarm_channel chan = TI_EQEP_ALARM_CHAN_TIMEOUT;
 		counter_alarm_callback_t cb = data->alarm_callback[chan];
 		void *user_data = data->alarm_user_data[chan];
@@ -502,10 +565,12 @@ static void ti_eqep_isr(const struct device *dev)
 
 		/* clear timeout interrupt */
 		regs->INTCLR |= TI_EQEP_INT_UTOI;
-	} else {
-		LOG_ERR("unknown interrupt %u encountered, clearing", flg);
+	}
 
-		regs->INTCLR |= flg;
+	if (unknown != 0U) {
+		LOG_ERR("unknown interrupt %u encountered, clearing", unknown);
+
+		regs->INTCLR |= unknown;
 	}
 
 	/* clear global interrupt */
@@ -639,15 +704,70 @@ int z_impl_ti_eqep_get_latched_capture_values(const struct device *dev, uint32_t
 	), (COND_CODE_1(CONFIG_CLOCK_CONTROL_ARM_SCMI,                                             \
 		(static const clock_control_subsys_t ti_eqep_clk_subsys_##n =                      \
 			(clock_control_subsys_t)DT_INST_PHA(n, clocks, name);                      \
-	), (BUILD_ASSERT(0, "Unsupported clock controller");))))
+	), (COND_CODE_1(CONFIG_CLOCK_CONTROL_MSPM0,                                                \
+		(static const struct mspm0_sys_clock ti_eqep_mspm0_sys_clock_##n =                \
+			MSPM0_CLOCK_SUBSYS_FN(n);                                                  \
+		static const clock_control_subsys_t ti_eqep_clk_subsys_##n =                       \
+			(clock_control_subsys_t)&ti_eqep_mspm0_sys_clock_##n;                      \
+	), (BUILD_ASSERT(0, "Unsupported clock controller");))))))
+
+/* On crossbar-routed SoCs (e.g. AM13E) each pinctrl-0 entry carrying
+ * "ti,xbar-in-gpio" metadata is routed through "ti,input-xbar" to the
+ * Input X-BAR channel at the same index of "ti,inputxbar-channels"
+ * (QEPA, QEPB, QEPI, QEPS order). raw=1 routes the raw pad signal, since
+ * the pin is pinctrl-owned and the GPIO-module-processed path carries
+ * no signal.
+ */
+#define TI_EQEP_HAS_IN_XBAR(n)                                                                     \
+	UTIL_AND(DT_INST_NODE_HAS_PROP(n, ti_input_xbar), DT_INST_NODE_HAS_PROP(n, pinctrl_0))
+
+#define TI_EQEP_PIN_HAS_IN_ROUTE(node_id, prop, idx)                                               \
+	DT_NODE_HAS_PROP(DT_PHANDLE_BY_IDX(node_id, prop, idx), ti_xbar_in_gpio)
+
+#define TI_EQEP_IN_CTRL_DEFINE(node_id, prop, idx, n)                                              \
+	IF_ENABLED(TI_EQEP_PIN_HAS_IN_ROUTE(node_id, prop, idx),                                   \
+		   (static const uint32_t ti_eqep_in_cells_##n##_##idx[] = {                       \
+			    DT_PROP_BY_IDX(node_id, ti_inputxbar_channels, idx)};                  \
+		    static const struct mux_control ti_eqep_in_ctrl_##n##_##idx = {                \
+			    .cells = ti_eqep_in_cells_##n##_##idx,                                 \
+			    .len = 1,                                                              \
+		    };))
+
+#define TI_EQEP_IN_ROUTE_ENTRY(node_id, prop, idx, n)                                              \
+	COND_CODE_1(TI_EQEP_PIN_HAS_IN_ROUTE(node_id, prop, idx),                                  \
+		    ({                                                                             \
+			    .ctrl = &ti_eqep_in_ctrl_##n##_##idx,                                  \
+			    .state = AM13E230_XBAR_IN_STATE(                                       \
+				    DT_PROP(DT_PHANDLE_BY_IDX(node_id, prop, idx),                 \
+					    ti_xbar_in_gpio),                                      \
+				    1),                                                            \
+		    },),                                                                           \
+		    ({.ctrl = NULL},))
+
+#define TI_EQEP_ROUTES_DEFINE(n)                                                                   \
+	IF_ENABLED(TI_EQEP_HAS_IN_XBAR(n),                                                         \
+		   (DT_INST_FOREACH_PROP_ELEM_VARGS(n, pinctrl_0, TI_EQEP_IN_CTRL_DEFINE, n)       \
+		    static const struct ti_eqep_in_route ti_eqep_in_routes_##n[] = {               \
+			    DT_INST_FOREACH_PROP_ELEM_VARGS(n, pinctrl_0,                          \
+							    TI_EQEP_IN_ROUTE_ENTRY, n)};))
+
+#define TI_EQEP_ROUTES_INIT(n)                                                                     \
+	IF_ENABLED(TI_EQEP_HAS_IN_XBAR(n),                                                         \
+		   (.in_xbar = DEVICE_DT_GET(DT_INST_PHANDLE(n, ti_input_xbar)),                   \
+		    .in_routes = ti_eqep_in_routes_##n,                                            \
+		    .num_in_routes = ARRAY_SIZE(ti_eqep_in_routes_##n),))
 
 #define TI_EQEP_INIT(n)                                                                            \
 	PINCTRL_DT_INST_DEFINE(n);                                                                 \
 	TI_EQEP_DEFINE_CLK_SUBSYS(n);                                                              \
+	TI_EQEP_ROUTES_DEFINE(n)                                                                   \
 	static void ti_eqep_irq_config_func_##n(void)                                              \
 	{                                                                                          \
-		IRQ_CONNECT(DT_INST_IRQN(n), DT_INST_IRQ(n, priority), ti_eqep_isr,                \
-			    DEVICE_DT_INST_GET(n), DT_INST_IRQ(n, flags));                         \
+		IRQ_CONNECT(                                                                       \
+			DT_INST_IRQN(n), DT_INST_IRQ(n, priority), ti_eqep_isr,                    \
+			DEVICE_DT_INST_GET(n),                                                     \
+			COND_CODE_1(DT_INST_IRQ_HAS_CELL(n, flags),                            \
+					(DT_INST_IRQ(n, flags)), (0)));    \
 		irq_enable(DT_INST_IRQN(n));                                                       \
 	}                                                                                          \
 	static struct ti_eqep_cfg ti_eqep_config_##n = {                                           \
@@ -661,7 +781,7 @@ int z_impl_ti_eqep_get_latched_capture_values(const struct device *dev, uint32_t
 		.clock_subsys = ti_eqep_clk_subsys_##n,                                            \
 		.irq_config_func = ti_eqep_irq_config_func_##n,                                    \
 		.pcfg = PINCTRL_DT_INST_DEV_CONFIG_GET(n),                                         \
-	};                                                                                         \
+		TI_EQEP_ROUTES_INIT(n)};                                                           \
                                                                                                    \
 	static struct ti_eqep_data ti_eqep_data_##n;                                               \
                                                                                                    \

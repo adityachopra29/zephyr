@@ -7,5 +7,6 @@ config COUNTER_TI_AM3352_EQEP
 	depends on DT_HAS_TI_AM3352_EQEP_ENABLED
 	depends on CLOCK_CONTROL
 	select PINCTRL
+	select MUX if DT_HAS_TI_AM13E230_XBAR_IN_ENABLED
 	help
 	  Enables the TI EQEP counter driver.

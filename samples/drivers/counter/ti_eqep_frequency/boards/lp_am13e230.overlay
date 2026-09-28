@@ -1,0 +1,29 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Texas Instruments
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * PB3 drives the test signal and PB11 feeds EQEP0 QEPA through Input
+ * X-BAR channel 16: jumper BoosterPack J4 pin 40 (PB3) to J2 pin 11 (PB11).
+ */
+
+/ {
+	aliases {
+		eqep0 = &eqep0;
+	};
+
+	zephyr,user {
+		signal-gpios = <&gpiob 3 GPIO_ACTIVE_HIGH>;
+	};
+};
+
+/* eCAP0 drives APWM on PB3 on this board, which the test signal uses. */
+&ecap0 {
+	status = "disabled";
+};
+
+&eqep0 {
+	status = "okay";
+
+	pinctrl-0 = <&inputxbar_pb11>;
+	pinctrl-names = "default";
+};

@@ -1,0 +1,24 @@
+sample:
+  name: TI EQEP frequency measurement
+common:
+  tags:
+    - drivers
+    - counter
+  depends_on:
+    - counter
+    - gpio
+  filter: dt_alias_exists("eqep0") and dt_compat_enabled("ti,am3352-eqep")
+tests:
+  sample.drivers.counter.ti_eqep_frequency:
+    platform_allow:
+      - lp_am13e230
+    integration_platforms:
+      - lp_am13e230
+    harness: console
+    harness_config:
+      fixture: gpio_loopback
+      type: multi_line
+      ordered: true
+      regex:
+        - "TI EQEP frequency measurement sample"
+        - "measured 100 Hz"
