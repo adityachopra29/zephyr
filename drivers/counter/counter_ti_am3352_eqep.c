@@ -5,10 +5,19 @@
 
 #include <zephyr/drivers/counter/ti_am3352_eqep.h>
 #include <zephyr/irq.h>
+#include <zephyr/drivers/mux.h>
 #include <zephyr/drivers/pinctrl.h>
 #include <zephyr/drivers/counter.h>
 #include <zephyr/drivers/clock_control.h>
 #include <zephyr/logging/log.h>
+
+#ifdef CONFIG_CLOCK_CONTROL_TISCI
+#include <zephyr/drivers/clock_control/tisci_clock_control.h>
+#endif
+
+#ifdef CONFIG_CLOCK_CONTROL_MSPM0
+#include <zephyr/drivers/clock_control/mspm0_clock_control.h>
+#endif
 
 LOG_MODULE_REGISTER(ti_eqep);
 
@@ -39,6 +48,9 @@ struct ti_eqep_regs {
 	uint8_t RESERVED_4[0x4];    /**< Reserved, offset: 0x3A - 0x3E */
 	volatile uint16_t QCTLAT;   /**< QEP Capture Timer Latch Register, offset: 0x3E */
 	volatile uint16_t QCPRDLAT; /**< QEP Capture Period Latch Register, offset: 0x40 */
+	uint8_t RESERVED_5[0x2A];   /**< Reserved, offset: 0x42 - 0x6C */
+	/** QEP Source Select Register, offset: 0x6C (crossbar-routed SoCs only, e.g. AM13E) */
+	volatile uint32_t QEPSRCSEL;
 };
 
 /* Quadrature Decoder Control Register */
@@ -70,6 +82,11 @@ struct ti_eqep_regs {
 #define TI_EQEP_QCAPCTL_CCPS GENMASK(6, 4)
 #define TI_EQEP_QCAPCTL_UPPS GENMASK(3, 0)
 
+/* QEP Source Select Register: 0 selects the Input X-BAR (AM13E-only) */
+#define TI_EQEP_QEPSRCSEL_QEPASEL GENMASK(3, 0)
+#define TI_EQEP_QEPSRCSEL_QEPBSEL GENMASK(7, 4)
+#define TI_EQEP_QEPSRCSEL_QEPISEL GENMASK(11, 8)
+
 /* Interrupt Types - used in multiple registers */
 #define TI_EQEP_INT_UTOI BIT(11) /* Timeout Event */
 #define TI_EQEP_INT_IELI BIT(10) /* Index Event */
@@ -84,6 +101,14 @@ struct ti_eqep_regs {
 #define DEV_DATA(dev) ((struct ti_eqep_data *)(dev)->data)
 #define DEV_REGS(dev) ((struct ti_eqep_regs *)DEVICE_MMIO_NAMED_GET(dev, base))
 
+/* One crossbar routing applied through the mux subsystem at init, decoded
+ * from a "mux-states" phandle-array entry.
+ */
+struct ti_eqep_mux_entry {
+	const struct device *dev;
+	const struct mux_state *state;
+};
+
 struct ti_eqep_cfg {
 	struct counter_config_info info;
 
@@ -92,6 +117,9 @@ struct ti_eqep_cfg {
 	clock_control_subsys_t clock_subsys;
 	const struct pinctrl_dev_config *pcfg;
 	void (*irq_config_func)();
+	const struct ti_eqep_mux_entry *mux_entries;
+	uint8_t mux_entries_count;
+	bool has_input_xbar;
 };
 
 struct ti_eqep_data {
@@ -129,8 +157,11 @@ static void ti_eqep_reset_counter(const struct device *dev, uint32_t top_value)
 		regs->QPOSINIT = top_value;
 	}
 
-	/* initialize counter */
+	/* SWI does not self-clear, and while it stays set every later QEPCTL
+	 * write re-initializes the counter, so pulse it.
+	 */
 	regs->QEPCTL |= TI_EQEP_QEPCTL_SWI;
+	regs->QEPCTL &= ~TI_EQEP_QEPCTL_SWI;
 }
 
 static int ti_eqep_start(const struct device *dev)
@@ -415,6 +446,27 @@ static int ti_eqep_init(const struct device *dev)
 		return ret;
 	}
 
+	for (uint8_t i = 0; i < cfg->mux_entries_count; i++) {
+		const struct ti_eqep_mux_entry *entry = &cfg->mux_entries[i];
+
+		if (!device_is_ready(entry->dev)) {
+			LOG_ERR("xbar device not ready");
+			return -ENODEV;
+		}
+
+		ret = mux_state_apply(entry->dev, entry->state);
+		if (ret < 0) {
+			LOG_ERR("failed to apply mux state %d: %d", i, ret);
+			return ret;
+		}
+	}
+
+	if (cfg->has_input_xbar) {
+		/* 0 = DL_EQEP_SOURCE_INPUTXBAR for QEPA/QEPB/QEPI */
+		regs->QEPSRCSEL &= ~(TI_EQEP_QEPSRCSEL_QEPASEL | TI_EQEP_QEPSRCSEL_QEPBSEL |
+				     TI_EQEP_QEPSRCSEL_QEPISEL);
+	}
+
 	/* irq connect */
 	cfg->irq_config_func();
 
@@ -639,15 +691,51 @@ int z_impl_ti_eqep_get_latched_capture_values(const struct device *dev, uint32_t
 	), (COND_CODE_1(CONFIG_CLOCK_CONTROL_ARM_SCMI,                                             \
 		(static const clock_control_subsys_t ti_eqep_clk_subsys_##n =                      \
 			(clock_control_subsys_t)DT_INST_PHA(n, clocks, name);                      \
-	), (BUILD_ASSERT(0, "Unsupported clock controller");))))
+	), (COND_CODE_1(CONFIG_CLOCK_CONTROL_MSPM0,                                                \
+		(static const struct mspm0_sys_clock ti_eqep_mspm0_sys_clock_##n =                \
+			MSPM0_CLOCK_SUBSYS_FN(n);                                                  \
+		static const clock_control_subsys_t ti_eqep_clk_subsys_##n =                     \
+			(clock_control_subsys_t)&ti_eqep_mspm0_sys_clock_##n;                     \
+	), (BUILD_ASSERT(0, "Unsupported clock controller");))))))
+
+/* One entry per "mux-states" phandle-array element: applies the Input
+ * X-BAR routing named by that entry through the mux subsystem.
+ */
+#define TI_EQEP_MUX_ENTRY(node_id, prop, idx)                                                      \
+	{                                                                                          \
+		.dev = MUX_STATE_DT_DEV_GET_BY_IDX(node_id, idx),                                  \
+		.state = MUX_STATE_DT_GET_BY_IDX(node_id, idx),                                    \
+	}
+
+#define TI_EQEP_MUX_ENTRIES_DEFINE(n)                                                              \
+	IF_ENABLED(DT_INST_NODE_HAS_PROP(n, mux_states),                                          \
+		   (MUX_STATE_DT_INST_SPEC_DEFINE_ALL(n);                                         \
+		    static const struct ti_eqep_mux_entry ti_eqep_mux_entries_##n[] = {          \
+			    DT_INST_FOREACH_PROP_ELEM_SEP(n, mux_states, TI_EQEP_MUX_ENTRY,      \
+							   (,))};))
+
+/* Presence of "mux-states" means this EQEP is fed through the Input
+ * X-BAR, so QEPSRCSEL must select INPUTXBAR (0). Unlike eCAP's ECCTL0,
+ * EQEP input channels are hard-wired in silicon; the mux-state channel
+ * cell only programs the crossbar.
+ */
+#define TI_EQEP_MUX_ENTRIES_INIT(n)                                                                \
+	COND_CODE_1(DT_INST_NODE_HAS_PROP(n, mux_states),                                         \
+		    (.mux_entries = ti_eqep_mux_entries_##n,                                      \
+		     .mux_entries_count = ARRAY_SIZE(ti_eqep_mux_entries_##n),                    \
+		     .has_input_xbar = true,), ())
 
 #define TI_EQEP_INIT(n)                                                                            \
 	PINCTRL_DT_INST_DEFINE(n);                                                                 \
 	TI_EQEP_DEFINE_CLK_SUBSYS(n);                                                              \
+	TI_EQEP_MUX_ENTRIES_DEFINE(n);                                                             \
 	static void ti_eqep_irq_config_func_##n(void)                                              \
 	{                                                                                          \
-		IRQ_CONNECT(DT_INST_IRQN(n), DT_INST_IRQ(n, priority), ti_eqep_isr,                \
-			    DEVICE_DT_INST_GET(n), DT_INST_IRQ(n, flags));                         \
+		IRQ_CONNECT(                                                                       \
+			DT_INST_IRQN(n), DT_INST_IRQ(n, priority), ti_eqep_isr,                    \
+			DEVICE_DT_INST_GET(n),                                                     \
+			COND_CODE_1(DT_INST_IRQ_HAS_CELL(n, flags),                            \
+					(DT_INST_IRQ(n, flags)), (0)));    \
 		irq_enable(DT_INST_IRQN(n));                                                       \
 	}                                                                                          \
 	static struct ti_eqep_cfg ti_eqep_config_##n = {                                           \
@@ -661,7 +749,7 @@ int z_impl_ti_eqep_get_latched_capture_values(const struct device *dev, uint32_t
 		.clock_subsys = ti_eqep_clk_subsys_##n,                                            \
 		.irq_config_func = ti_eqep_irq_config_func_##n,                                    \
 		.pcfg = PINCTRL_DT_INST_DEV_CONFIG_GET(n),                                         \
-	};                                                                                         \
+		TI_EQEP_MUX_ENTRIES_INIT(n)};                                                      \
                                                                                                    \
 	static struct ti_eqep_data ti_eqep_data_##n;                                               \
                                                                                                    \
