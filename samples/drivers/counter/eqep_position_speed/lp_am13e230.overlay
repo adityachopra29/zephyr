@@ -1,0 +1,42 @@
+#include <zephyr/dt-bindings/gpio/gpio.h>
+#include <zephyr/dt-bindings/mux/ti_am13e230_xbar_in.h>
+
+/ {
+	aliases {
+		eqep0 = &eqep0;
+	};
+
+	zephyr,user {
+		/* Fake quadrature: A = PB3, B = PB1 */
+		signal-a-gpios = <&gpiob 3 GPIO_ACTIVE_HIGH>;
+		signal-b-gpios = <&gpiob 1 GPIO_ACTIVE_HIGH>;
+	};
+};
+
+&xbar1 {
+	status = "okay";
+};
+
+&gpio_pb11 {
+	input-enable;
+	bias-pull-down;
+};
+
+&gpio_pb12 {
+	input-enable;
+	bias-pull-down;
+};
+
+&eqep0 {
+	status = "okay";
+
+	pinctrl-0 = <&gpio_pb11 &gpio_pb12>;
+	pinctrl-names = "default";
+
+	/* PB11 (GPIO43) -> INPUTXBAR17 (ch 16) -> EQEP0A
+	 * PB12 (GPIO44) -> INPUTXBAR18 (ch 17) -> EQEP0B
+	 */
+	mux-states = <&xbar1 16 AM13E230_XBAR_IN_STATE(43, 1)>,
+		     <&xbar1 17 AM13E230_XBAR_IN_STATE(44, 1)>;
+	mux-state-names = "qepa", "qepb";
+};
