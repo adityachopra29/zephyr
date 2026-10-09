@@ -1,15 +1,8 @@
-#include <zephyr/dt-bindings/gpio/gpio.h>
 #include <zephyr/dt-bindings/mux/ti_am13e230_xbar_in.h>
 
 / {
 	aliases {
 		eqep0 = &eqep0;
-	};
-
-	zephyr,user {
-		/* Fake quadrature: A = PB3, B = PB1 */
-		signal-a-gpios = <&gpiob 3 GPIO_ACTIVE_HIGH>;
-		signal-b-gpios = <&gpiob 1 GPIO_ACTIVE_HIGH>;
 	};
 };
 
@@ -35,6 +28,9 @@
 
 	/* PB11 (GPIO43) -> INPUTXBAR17 (ch 16) -> EQEP0A
 	 * PB12 (GPIO44) -> INPUTXBAR18 (ch 17) -> EQEP0B
+	 *
+	 * Drive from SDK mcpwm_quadrature_gen on a second board:
+	 *   PB3 (A) -> PB11, PB1 (B) -> PB12, common GND.
 	 */
 	mux-states = <&xbar1 16 AM13E230_XBAR_IN_STATE(43, 1)>,
 		     <&xbar1 17 AM13E230_XBAR_IN_STATE(44, 1)>;
