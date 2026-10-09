@@ -9,6 +9,9 @@
  *   generator PB3 (A) -> PB11 (EQEP0A / INPUTXBAR17)
  *   generator PB1 (B) -> PB12 (EQEP0B / INPUTXBAR18)
  *   GND               -> GND
+ *
+ * FR uses a 1 s software window on QPOSCNT (same math as the unit-timer
+ * FR path). Capture latch is CPU-read so PR works without UTOI.
  */
 
 #include <zephyr/kernel.h>
@@ -34,6 +37,7 @@ BUILD_ASSERT(POSITION_TOP > 2U * EXPECTED_COUNTS_HZ,
 	     "position counter wraps within a window");
 
 #define UPEVNT_DIV 2U
+#define WINDOW_MS  1000U
 
 struct speed_sample {
 	uint32_t position;
@@ -47,8 +51,8 @@ static const struct device *const eqep = DEVICE_DT_GET(DT_ALIAS(eqep0));
 
 K_MSGQ_DEFINE(speed_msgq, sizeof(struct speed_sample), 8, 4);
 
-static struct counter_alarm_cfg window_cfg;
 static uint32_t prev_position;
+static bool have_prev;
 
 static uint32_t position_delta(uint32_t prev, uint32_t cur, uint32_t top, bool *wrapped)
 {
@@ -68,30 +72,37 @@ static int32_t rpm_from_counts_per_sec(uint32_t counts_per_sec, bool counting_up
 	return counting_up ? rpm : -rpm;
 }
 
-static void window_expired(const struct device *dev, uint8_t chan_id, uint32_t ticks,
-			   void *user_data)
+static void window_timer_handler(struct k_timer *timer)
 {
 	struct speed_sample sample = {
-		.position = ticks,
-		.counting_up = counter_is_counting_up(dev),
+		.counting_up = counter_is_counting_up(eqep),
 	};
-	int ret;
+	uint32_t pos = 0;
 
-	ARG_UNUSED(user_data);
+	ARG_UNUSED(timer);
+
+	/* QCLM=CPU: reading QPOSCNT also latches capture for PR. */
+	if (counter_get_value(eqep, &pos) != 0) {
+		return;
+	}
+
+	sample.position = pos;
+
+	if (!have_prev) {
+		prev_position = pos;
+		have_prev = true;
+		return;
+	}
 
 	sample.delta =
-		position_delta(prev_position, ticks, counter_get_top_value(dev), &sample.wrapped);
-	prev_position = ticks;
+		position_delta(prev_position, pos, counter_get_top_value(eqep), &sample.wrapped);
+	prev_position = pos;
 	sample.rpm_fr = rpm_from_counts_per_sec(sample.delta, sample.counting_up);
 
 	(void)k_msgq_put(&speed_msgq, &sample, K_NO_WAIT);
-
-	/* Driver clears the callback on expiry; re-arm for the next window. */
-	ret = counter_set_channel_alarm(dev, chan_id, &window_cfg);
-	if (ret != 0) {
-		printk("Failed to re-arm unit timer (%d)\n", ret);
-	}
 }
+
+K_TIMER_DEFINE(window_timer, window_timer_handler, NULL);
 
 static bool rpm_pr_from_capture(int32_t *rpm_pr)
 {
@@ -120,7 +131,7 @@ static int eqep_setup(void)
 	};
 	const struct ti_eqep_qep_cfg qep_cfg = {
 		.reset_mode = TI_EQEP_RESET_MODE_MAX,
-		.capture_latch = TI_EQEP_CAPTURE_LATCH_TIMEOUT,
+		.capture_latch = TI_EQEP_CAPTURE_LATCH_CPU,
 	};
 	const struct ti_eqep_cap_cfg cap_cfg = {
 		.enable = true,
@@ -150,25 +161,10 @@ static int eqep_setup(void)
 	}
 
 	freq = counter_get_frequency(eqep);
-	if (freq == 0U) {
-		printk("eQEP clock frequency is 0; cannot arm unit timer\n");
-		return -EIO;
-	}
+	printk("eQEP clock %u Hz; 1 s software FR windows (CPU capture latch)\n", freq);
 
-	window_cfg = (struct counter_alarm_cfg){
-		.callback = window_expired,
-		.ticks = freq,
-		.user_data = NULL,
-		.flags = 0,
-	};
-
-	ret = counter_set_channel_alarm(eqep, TI_EQEP_ALARM_CHAN_TIMEOUT, &window_cfg);
-	if (ret != 0) {
-		printk("Failed to arm unit timer (%d)\n", ret);
-		return ret;
-	}
-
-	printk("eQEP clock %u Hz; unit timer armed for 1 s windows\n", freq);
+	have_prev = false;
+	k_timer_start(&window_timer, K_MSEC(WINDOW_MS), K_MSEC(WINDOW_MS));
 	return 0;
 }
 
@@ -194,7 +190,6 @@ static bool counts_out_of_tol(uint32_t delta)
 int main(void)
 {
 	struct speed_sample sample;
-	bool first = true;
 	int ret;
 
 	printk("TI EQEP position/speed sample (FR + PR, MCPWM stimulus)\n");
@@ -217,15 +212,10 @@ int main(void)
 		ret = k_msgq_get(&speed_msgq, &sample, K_SECONDS(2));
 		if (ret != 0) {
 			uint32_t pos = 0;
+			uint32_t pending = counter_get_pending_int(eqep);
 
 			(void)counter_get_value(eqep, &pos);
-			printk("waiting for unit timeout... live pos=%u\n", pos);
-			continue;
-		}
-
-		if (first) {
-			first = false;
-			printk("first window discarded (partial)\n");
+			printk("waiting for window... live pos=%u pending=0x%x\n", pos, pending);
 			continue;
 		}
 

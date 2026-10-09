@@ -9,6 +9,7 @@
 #include <zephyr/drivers/counter.h>
 #include <zephyr/drivers/clock_control.h>
 #include <zephyr/logging/log.h>
+#include <stddef.h>
 
 #ifdef CONFIG_CLOCK_CONTROL_TISCI
 #include <zephyr/drivers/clock_control/tisci_clock_control.h>
@@ -52,7 +53,7 @@ struct ti_eqep_regs {
 	volatile uint16_t INTEN;    /**< QEP Interrupt Enable Register, offset: 0x30 */
 	volatile uint16_t INTFLG;   /**< QEP Interrupt Flag Register, offset: 0x32 */
 	volatile uint16_t INTCLR;   /**< QEP Interrupt Clear Register, offset: 0x34 */
-	uint8_t RESERVED_3[0x2];    /**< Reserved, offset: 0x36 - 0x38 */
+	volatile uint16_t INTFRC;   /**< QEP Interrupt Force Register, offset: 0x36 */
 	volatile uint16_t QEPSTS;   /**< QEP Status Register, offset: 0x38 */
 	uint8_t RESERVED_4[0x4];    /**< Reserved, offset: 0x3A - 0x3E */
 	volatile uint16_t QCTLAT;   /**< QEP Capture Timer Latch Register, offset: 0x3E */
@@ -62,6 +63,18 @@ struct ti_eqep_regs {
 	volatile uint32_t QEPSRCSEL; /**< QEP Source Select, offset: 0x6C */
 #endif
 };
+
+/* Keep the overlay aligned with the AM13 / classic eQEP map. */
+BUILD_ASSERT(offsetof(struct ti_eqep_regs, QUTMR) == 0x1c);
+BUILD_ASSERT(offsetof(struct ti_eqep_regs, QUPRD) == 0x20);
+BUILD_ASSERT(offsetof(struct ti_eqep_regs, QEPCTL) == 0x2a);
+BUILD_ASSERT(offsetof(struct ti_eqep_regs, INTEN) == 0x30);
+BUILD_ASSERT(offsetof(struct ti_eqep_regs, INTFLG) == 0x32);
+BUILD_ASSERT(offsetof(struct ti_eqep_regs, INTCLR) == 0x34);
+BUILD_ASSERT(offsetof(struct ti_eqep_regs, INTFRC) == 0x36);
+#ifdef CONFIG_COUNTER_TI_AM3352_EQEP_VARIANT_AM13
+BUILD_ASSERT(offsetof(struct ti_eqep_regs, QEPSRCSEL) == 0x6c);
+#endif
 
 /* Quadrature Decoder Control Register */
 #define TI_EQEP_QDECCTL_QSRC GENMASK(15, 14)
@@ -251,6 +264,12 @@ static int ti_eqep_set_top_value(const struct device *dev, const struct counter_
 		ti_eqep_reset_counter(dev, top_cfg->ticks);
 	}
 
+	if (top_cfg->callback != NULL) {
+		regs->INTEN |= (TI_EQEP_INT_PCOI | TI_EQEP_INT_PCUI);
+	} else {
+		regs->INTEN &= ~(TI_EQEP_INT_PCOI | TI_EQEP_INT_PCUI);
+	}
+
 	return 0;
 }
 
@@ -346,15 +365,16 @@ int ti_eqep_set_alarm(const struct device *dev, uint8_t chan_id,
 		break;
 	}
 	case TI_EQEP_ALARM_CHAN_TIMEOUT: {
-		/* Restart unit timer from 0 for a full period. */
+		/*
+		 * Match SDK enableUnitTimer: load QUPRD, enable UTE, then
+		 * arm UTO. Restart QUTMR from 0 so the first window is a
+		 * full period. INTCLR is write-1-to-clear; do not RMW it.
+		 */
 		regs->QEPCTL &= ~TI_EQEP_QEPCTL_UTE;
 		regs->QUTMR = 0;
 		regs->QUPRD = ticks;
-
-		/* enable timeout event interrupt */
+		regs->INTCLR = TI_EQEP_INT_UTOI | TI_EQEP_INT_GLOB;
 		regs->INTEN |= TI_EQEP_INT_UTOI;
-
-		/* enable timeout */
 		regs->QEPCTL |= TI_EQEP_QEPCTL_UTE;
 
 		break;
@@ -427,7 +447,7 @@ static int ti_eqep_cancel_alarm(const struct device *dev, uint8_t chan_id)
 
 static uint32_t ti_eqep_get_pending_int(const struct device *dev)
 {
-	return (DEV_REGS(dev)->INTFLG != 0U) ? 1U : 0U;
+	return DEV_REGS(dev)->INTFLG;
 }
 
 static uint32_t ti_eqep_get_guard_period(const struct device *dev, uint32_t flags)
@@ -543,8 +563,9 @@ static int ti_eqep_init(const struct device *dev)
 	/* reset counter */
 	ti_eqep_reset_counter(dev, cfg->info.max_top_value);
 
-	/* enable overflow/underflow interrupts */
-	regs->INTEN |= (TI_EQEP_INT_PCOI | TI_EQEP_INT_PCUI);
+	/* Drop sticky flags from reset; PCOI/PCUI armed only with a top callback. */
+	regs->INTCLR = TI_EQEP_INT_PCOI | TI_EQEP_INT_PCUI | TI_EQEP_INT_UTOI |
+		       TI_EQEP_INT_GLOB;
 
 	return 0;
 }
@@ -564,8 +585,8 @@ static void ti_eqep_isr(const struct device *dev)
 			data->top_callback(dev, data->top_user_data);
 		}
 
-		/* clear overflow/underflow */
-		regs->INTCLR |= (TI_EQEP_INT_PCOI | TI_EQEP_INT_PCUI);
+		/* INTCLR is write-1-to-clear; do not RMW. */
+		regs->INTCLR = TI_EQEP_INT_PCOI | TI_EQEP_INT_PCUI;
 	}
 
 	if (flg & TI_EQEP_INT_PCMI) {
@@ -583,8 +604,7 @@ static void ti_eqep_isr(const struct device *dev)
 			cb(dev, chan, regs->QPOSCMP, user_data);
 		}
 
-		/* clear compare interrupt */
-		regs->INTCLR |= TI_EQEP_INT_PCMI;
+		regs->INTCLR = TI_EQEP_INT_PCMI;
 	}
 
 	if (flg & TI_EQEP_INT_SELI) {
@@ -599,8 +619,7 @@ static void ti_eqep_isr(const struct device *dev)
 			cb(dev, chan, regs->QPOSSLAT, user_data);
 		}
 
-		/* clear strobe interrupt */
-		regs->INTCLR |= TI_EQEP_INT_SELI;
+		regs->INTCLR = TI_EQEP_INT_SELI;
 	}
 
 	if (flg & TI_EQEP_INT_IELI) {
@@ -615,8 +634,7 @@ static void ti_eqep_isr(const struct device *dev)
 			cb(dev, chan, regs->QPOSILAT, user_data);
 		}
 
-		/* clear index interrupt */
-		regs->INTCLR |= TI_EQEP_INT_IELI;
+		regs->INTCLR = TI_EQEP_INT_IELI;
 	}
 
 	if (flg & TI_EQEP_INT_UTOI) {
@@ -631,18 +649,16 @@ static void ti_eqep_isr(const struct device *dev)
 			cb(dev, chan, regs->QPOSLAT, user_data);
 		}
 
-		/* clear timeout interrupt */
-		regs->INTCLR |= TI_EQEP_INT_UTOI;
+		regs->INTCLR = TI_EQEP_INT_UTOI;
 	}
 
 	if (unknown != 0U) {
 		LOG_ERR("unknown interrupt %u encountered, clearing", unknown);
 
-		regs->INTCLR |= unknown;
+		regs->INTCLR = unknown;
 	}
 
-	/* clear global interrupt */
-	regs->INTCLR |= TI_EQEP_INT_GLOB;
+	regs->INTCLR = TI_EQEP_INT_GLOB;
 }
 
 static DEVICE_API(counter, ti_eqep_api) = {
