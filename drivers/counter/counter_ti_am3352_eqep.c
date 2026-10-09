@@ -42,7 +42,7 @@ struct ti_eqep_regs {
 	volatile uint32_t QPOSILAT; /**< Index Position Latch Register, offset: 0x10 */
 	volatile uint32_t QPOSSLAT; /**< Strobe Position Latch Register, offset: 0x14 */
 	volatile uint32_t QPOSLAT;  /**< QEP Position Counter Latch Register, offset: 0x18 */
-	uint8_t RESERVED_1[0x4];    /**< Reserved, offset: 0x1C - 0x20 */
+	volatile uint32_t QUTMR;    /**< QEP Unit Timer, offset: 0x1C */
 	volatile uint32_t QUPRD;    /**< QEP Unit Timer Period, offset: 0x20 */
 	uint8_t RESERVED_2[0x4];    /**< Reserved, offset: 0x24 - 0x28 */
 	volatile uint16_t QDECCTL;  /**< Quadrature Decoder, offset: 0x28 */
@@ -346,7 +346,9 @@ int ti_eqep_set_alarm(const struct device *dev, uint8_t chan_id,
 		break;
 	}
 	case TI_EQEP_ALARM_CHAN_TIMEOUT: {
-		/* set ticks as timeout period */
+		/* Restart unit timer from 0 for a full period. */
+		regs->QEPCTL &= ~TI_EQEP_QEPCTL_UTE;
+		regs->QUTMR = 0;
 		regs->QUPRD = ticks;
 
 		/* enable timeout event interrupt */

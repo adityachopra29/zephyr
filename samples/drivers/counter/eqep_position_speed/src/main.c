@@ -18,9 +18,9 @@
 #include <zephyr/sys/printk.h>
 
 /* MCPWM up-down period 19999 @ 50 MHz TBCLK → ~800 us / ~1250 Hz. */
-#define SIGNAL_CYCLES_HZ     1250U
-#define COUNTS_PER_CYCLE     4U /* 4x quadrature decode */
-#define EXPECTED_COUNTS_HZ   (SIGNAL_CYCLES_HZ * COUNTS_PER_CYCLE)
+#define SIGNAL_CYCLES_HZ   1250U
+#define COUNTS_PER_CYCLE   4U /* 4x quadrature decode */
+#define EXPECTED_COUNTS_HZ (SIGNAL_CYCLES_HZ * COUNTS_PER_CYCLE)
 
 /* Same counts/rev as the AM13 SDK eqep_position_speed example. */
 #define ENCODER_RESOLUTION 6000U
@@ -39,10 +39,8 @@ struct speed_sample {
 	uint32_t position;
 	uint32_t delta;
 	int32_t rpm_fr;
-	int32_t rpm_pr;
 	bool wrapped;
 	bool counting_up;
-	bool pr_valid;
 };
 
 static const struct device *const eqep = DEVICE_DT_GET(DT_ALIAS(eqep0));
@@ -77,9 +75,6 @@ static void window_expired(const struct device *dev, uint8_t chan_id, uint32_t t
 		.position = ticks,
 		.counting_up = counter_is_counting_up(dev),
 	};
-	uint32_t cap_timer;
-	uint32_t cap_period;
-	uint32_t freq;
 	int ret;
 
 	ARG_UNUSED(user_data);
@@ -87,31 +82,35 @@ static void window_expired(const struct device *dev, uint8_t chan_id, uint32_t t
 	sample.delta =
 		position_delta(prev_position, ticks, counter_get_top_value(dev), &sample.wrapped);
 	prev_position = ticks;
-
-	/* FR: counts in the 1 s unit-timer window → RPM. */
 	sample.rpm_fr = rpm_from_counts_per_sec(sample.delta, sample.counting_up);
-
-	/*
-	 * PR: unit-timeout also latches QCPRDLAT (QCLM=timeout). Period is
-	 * between UPEVNT_DIV position clocks, scaled to eQEP clock ticks.
-	 */
-	ret = ti_eqep_get_latched_capture_values(dev, &cap_timer, &cap_period, true);
-	freq = counter_get_frequency(dev);
-	if (ret == 0 && cap_period != 0U && freq != 0U) {
-		uint64_t counts_per_sec =
-			((uint64_t)UPEVNT_DIV * (uint64_t)freq) / (uint64_t)cap_period;
-
-		sample.rpm_pr =
-			rpm_from_counts_per_sec((uint32_t)counts_per_sec, sample.counting_up);
-		sample.pr_valid = true;
-	}
 
 	(void)k_msgq_put(&speed_msgq, &sample, K_NO_WAIT);
 
+	/* Driver clears the callback on expiry; re-arm for the next window. */
 	ret = counter_set_channel_alarm(dev, chan_id, &window_cfg);
 	if (ret != 0) {
 		printk("Failed to re-arm unit timer (%d)\n", ret);
 	}
+}
+
+static bool rpm_pr_from_capture(int32_t *rpm_pr)
+{
+	uint32_t cap_timer;
+	uint32_t cap_period;
+	uint32_t freq;
+	int ret;
+
+	ret = ti_eqep_get_latched_capture_values(eqep, &cap_timer, &cap_period, true);
+	freq = counter_get_frequency(eqep);
+	if (ret != 0 || cap_period == 0U || freq == 0U) {
+		return false;
+	}
+
+	uint64_t counts_per_sec =
+		((uint64_t)UPEVNT_DIV * (uint64_t)freq) / (uint64_t)cap_period;
+
+	*rpm_pr = rpm_from_counts_per_sec((uint32_t)counts_per_sec, counter_is_counting_up(eqep));
+	return true;
 }
 
 static int eqep_setup(void)
@@ -131,6 +130,7 @@ static int eqep_setup(void)
 	const struct counter_top_cfg top_cfg = {
 		.ticks = POSITION_TOP,
 	};
+	uint32_t freq;
 	int ret;
 
 	ti_eqep_configure_decoder(eqep, &dec_cfg);
@@ -149,8 +149,18 @@ static int eqep_setup(void)
 		return ret;
 	}
 
-	window_cfg.callback = window_expired;
-	window_cfg.ticks = counter_get_frequency(eqep);
+	freq = counter_get_frequency(eqep);
+	if (freq == 0U) {
+		printk("eQEP clock frequency is 0; cannot arm unit timer\n");
+		return -EIO;
+	}
+
+	window_cfg = (struct counter_alarm_cfg){
+		.callback = window_expired,
+		.ticks = freq,
+		.user_data = NULL,
+		.flags = 0,
+	};
 
 	ret = counter_set_channel_alarm(eqep, TI_EQEP_ALARM_CHAN_TIMEOUT, &window_cfg);
 	if (ret != 0) {
@@ -158,6 +168,7 @@ static int eqep_setup(void)
 		return ret;
 	}
 
+	printk("eQEP clock %u Hz; unit timer armed for 1 s windows\n", freq);
 	return 0;
 }
 
@@ -203,22 +214,30 @@ int main(void)
 	}
 
 	while (true) {
-		bool bad;
+		ret = k_msgq_get(&speed_msgq, &sample, K_SECONDS(2));
+		if (ret != 0) {
+			uint32_t pos = 0;
 
-		k_msgq_get(&speed_msgq, &sample, K_FOREVER);
-
-		if (first) {
-			first = false;
+			(void)counter_get_value(eqep, &pos);
+			printk("waiting for unit timeout... live pos=%u\n", pos);
 			continue;
 		}
 
-		bad = counts_out_of_tol(sample.delta) || rpm_out_of_tol(sample.rpm_fr) ||
-		      (sample.pr_valid && rpm_out_of_tol(sample.rpm_pr));
+		if (first) {
+			first = false;
+			printk("first window discarded (partial)\n");
+			continue;
+		}
+
+		int32_t rpm_pr = 0;
+		bool pr_valid = rpm_pr_from_capture(&rpm_pr);
+		bool bad = counts_out_of_tol(sample.delta) || rpm_out_of_tol(sample.rpm_fr) ||
+			   (pr_valid && rpm_out_of_tol(rpm_pr));
 
 		printk("pos %5u  delta %u/s  FR %d RPM", sample.position, sample.delta,
 		       sample.rpm_fr);
-		if (sample.pr_valid) {
-			printk("  PR %d RPM", sample.rpm_pr);
+		if (pr_valid) {
+			printk("  PR %d RPM", rpm_pr);
 		} else {
 			printk("  PR n/a");
 		}
