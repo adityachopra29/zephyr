@@ -1,0 +1,52 @@
+#include <zephyr/dt-bindings/gpio/gpio.h>
+#include <zephyr/dt-bindings/mux/ti_am13e2_xbar_in.h>
+
+/ {
+	aliases {
+		eqep0 = &eqep0;
+	};
+
+	/* Simulated index output. Jumper this pin to PB18 (EQEP0I). */
+	zephyr,user {
+		index-gpios = <&gpioa 2 GPIO_ACTIVE_HIGH>;
+	};
+};
+
+&xbar1 {
+	status = "okay";
+};
+
+&gpio_pb11 {
+	input-enable;
+	bias-pull-down;
+};
+
+&gpio_pb12 {
+	input-enable;
+	bias-pull-down;
+};
+
+&gpio_pb18 {
+	input-enable;
+	bias-pull-down;
+};
+
+&eqep0 {
+	status = "okay";
+
+	pinctrl-0 = <&gpio_pb11 &gpio_pb12 &gpio_pb18>;
+	pinctrl-names = "default";
+
+	/*
+	 * PB11 (GPIO43) -> INPUTXBAR17 (ch 16) -> EQEP0A
+	 * PB12 (GPIO44) -> INPUTXBAR18 (ch 17) -> EQEP0B
+	 * PB18 (GPIO50) -> INPUTXBAR19 (ch 18) -> EQEP0I
+	 *
+	 * A/B from SDK mcpwm_quadrature_gen: PB3->PB11, PB1->PB12, GND.
+	 * Index is local: jumper PA2 (this sample) -> PB18.
+	 */
+	mux-states = <&xbar1 16 AM13E2_XBAR_IN_STATE(43, 1)>,
+		     <&xbar1 17 AM13E2_XBAR_IN_STATE(44, 1)>,
+		     <&xbar1 18 AM13E2_XBAR_IN_STATE(50, 1)>;
+	mux-state-names = "qepa", "qepb", "qepi";
+};

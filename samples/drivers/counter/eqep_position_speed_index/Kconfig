@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 Texas Instruments
+# SPDX-License-Identifier: Apache-2.0
+
+# Config for EQEP position/speed (index-window) sample.
+
+config APP_EQEP_LINES_PER_REV
+	int "Encoder lines per mechanical revolution"
+	default 1500
+	help
+	  Number of quadrature lines per mechanical revolution. The decoder
+	  uses 4x counting, so counts per revolution are four times this
+	  value. The simulated index GPIO is pulsed once every this many
+	  electrical periods. Default 1500 → 6000 counts/rev (AM13 SDK).
+
+config APP_EQEP_ELECTRICAL_FREQ_HZ
+	int "Simulated electrical frequency (Hz)"
+	default 1250
+	help
+	  Rate of the software timer used to count electrical cycles for the
+	  index pulse. Must match the external A/B stimulus frequency.
+	  Default matches MCPWM period 19999 @ 50 MHz TBCLK (~800 us).
+
+source "Kconfig.zephyr"
