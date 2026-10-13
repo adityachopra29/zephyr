@@ -36,4 +36,8 @@ source "subsys/logging/Kconfig.template.log_config"
 
 comment "MUX Drivers"
 
+# zephyr-keep-sorted-start
+rsource "Kconfig.ti_am13e230_xbar_in"
+# zephyr-keep-sorted-stop
+
 endif # MUX
