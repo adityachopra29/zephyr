@@ -5,7 +5,6 @@
 
 #include <zephyr/irq.h>
 #include <zephyr/dt-bindings/pwm/pwm.h>
-#include <zephyr/drivers/mux.h>
 #include <zephyr/drivers/pinctrl.h>
 #include <zephyr/drivers/pwm.h>
 #include <zephyr/drivers/clock_control.h>
@@ -19,16 +18,17 @@
 #include <zephyr/drivers/clock_control/mspm0_clock_control.h>
 #endif
 
-LOG_MODULE_REGISTER(ti_ecap);
-
-#define DT_DRV_COMPAT ti_am3352_ecap
-
-#if DT_ANY_INST_HAS_PROP_STATUS_OKAY(ti_pwren)
+#ifdef CONFIG_PWM_TI_AM3352_ECAP_VARIANT_AM13
+#include <zephyr/drivers/mux.h>
 #include <zephyr/drivers/syscon.h>
 #include <soc.h>
 
 #define TI_ECAP_SYSCTL_PWREN_KEY (0x26U << 24)
 #endif
+
+LOG_MODULE_REGISTER(ti_ecap);
+
+#define DT_DRV_COMPAT ti_am3352_ecap
 struct ti_ecap_regs {
 	volatile uint32_t TSCTR;         /**< Time-Stamp Counter, offset: 0x00 */
 	volatile uint32_t CTRPHS;        /**< Counter Phase Offset, offset: 0x04 */
@@ -37,7 +37,11 @@ struct ti_ecap_regs {
 	volatile uint32_t CAP3;          /**< Capture-3 / APWM shadow period, offset: 0x10 */
 	volatile uint32_t CAP4;          /**< Capture-4 / APWM shadow compare, offset: 0x14 */
 	uint8_t RESERVED_2[0xC];         /**< Reserved, offset: 0x18 - 0x24 */
+#ifdef CONFIG_PWM_TI_AM3352_ECAP_VARIANT_AM13
 	volatile uint32_t ECCTL0;        /**< Input mux select, AM13E-only, offset: 0x24 */
+#else
+	uint8_t RESERVED_ECCTL0[0x4];    /**< Reserved, offset: 0x24 - 0x28 */
+#endif
 	volatile uint32_t ECCTL;         /**< ECAP Control Register, offset: 0x28 */
 	volatile uint32_t ECINT_EN_FLG;  /**< ECAP Interrupt Enable & Flag Register, offset: 0x2C */
 	volatile uint32_t ECINT_CLR_FRC; /**< ECAP Interrupt Clear & Force Register, offset: 0x30 */
@@ -73,8 +77,10 @@ struct ti_ecap_regs {
 #define TI_ECAP_ECINT_CLR_CEVT4  BIT(4)
 #define TI_ECAP_ECINT_CLR_INT    BIT(0)
 
+#ifdef CONFIG_PWM_TI_AM3352_ECAP_VARIANT_AM13
 /* ECAP Input Mux Select Register (ECCTL0, AM13E-only) */
 #define TI_ECAP_ECCTL0_INPUTSEL_MASK GENMASK(6, 0)
+#endif
 
 #define DEV_CFG(dev)  ((const struct ti_ecap_cfg *)(dev)->config)
 #define DEV_DATA(dev) ((struct ti_ecap_data *)(dev)->data)
@@ -88,13 +94,12 @@ struct ti_ecap_capture_data {
 	bool continuous;
 };
 
-/* One crossbar routing applied through the mux subsystem at init, decoded
- * from a "mux-states" phandle-array entry.
- */
+#ifdef CONFIG_PWM_TI_AM3352_ECAP_VARIANT_AM13
 struct ti_ecap_mux_entry {
 	const struct device *dev;
 	const struct mux_state *state;
 };
+#endif
 
 struct ti_ecap_cfg {
 	DEVICE_MMIO_ROM;
@@ -103,11 +108,11 @@ struct ti_ecap_cfg {
 	clock_control_subsys_t clock_subsys;
 	uint32_t clock_frequency;
 	const struct pinctrl_dev_config *pcfg;
+#ifdef CONFIG_PWM_TI_AM3352_ECAP_VARIANT_AM13
 	const struct ti_ecap_mux_entry *mux_entries;
 	uint8_t mux_entries_count;
 	bool has_input_xbar;
 	uint8_t input_xbar_channel;
-#if DT_ANY_INST_HAS_PROP_STATUS_OKAY(ti_pwren)
 	const struct device *pwren_syscon;
 	uint32_t pwren_offset;
 	uint8_t pwren_bit;
@@ -130,7 +135,7 @@ static int ti_ecap_set_cycles(const struct device *dev, uint32_t channel, uint32
 
 	ecctl = regs->ECCTL;
 
-	/* Stop the counter while reconfiguring APWM (matches TI driverlib). */
+	/* Stop the counter while reconfiguring APWM. */
 	ecctl &= ~TI_ECAP_ECCTL_TSCNTSTP;
 	ecctl |= TI_ECAP_ECCTL_CAP_APWM;
 
@@ -143,12 +148,6 @@ static int ti_ecap_set_cycles(const struct device *dev, uint32_t channel, uint32
 
 	regs->ECCTL = ecctl;
 
-	/*
-	 * APWM uses CAP1/CAP2 as the active period/compare registers. CAP3/CAP4
-	 * are shadows that load on period match — writing only the shadows (as
-	 * this driver previously did) leaves CAP1 at reset 0, so no waveform is
-	 * generated. Program both active and shadow like DL_ECAP_setAPWM*.
-	 */
 	regs->CAP1 = period_cycles;
 	regs->CAP2 = pulse_cycles;
 	regs->CAP3 = period_cycles;
@@ -284,7 +283,7 @@ static int ti_ecap_configure_capture(const struct device *dev, uint32_t channel,
 }
 #endif /* CONFIG_PWM_CAPTURE */
 
-#if DT_ANY_INST_HAS_PROP_STATUS_OKAY(ti_pwren)
+#ifdef CONFIG_PWM_TI_AM3352_ECAP_VARIANT_AM13
 static int ti_ecap_pwren_enable(const struct ti_ecap_cfg *cfg)
 {
 	uint32_t bit;
@@ -312,15 +311,14 @@ static int ti_ecap_pwren_enable(const struct ti_ecap_cfg *cfg)
 
 	return 0;
 }
-#endif
+#endif /* CONFIG_PWM_TI_AM3352_ECAP_VARIANT_AM13 */
 
 static int ti_ecap_init(const struct device *dev)
 {
 	const struct ti_ecap_cfg *cfg = DEV_CFG(dev);
-	struct ti_ecap_regs *regs;
 	int ret;
 
-#if DT_ANY_INST_HAS_PROP_STATUS_OKAY(ti_pwren)
+#ifdef CONFIG_PWM_TI_AM3352_ECAP_VARIANT_AM13
 	ret = ti_ecap_pwren_enable(cfg);
 	if (ret < 0) {
 		return ret;
@@ -335,6 +333,7 @@ static int ti_ecap_init(const struct device *dev)
 		return ret;
 	}
 
+#ifdef CONFIG_PWM_TI_AM3352_ECAP_VARIANT_AM13
 	for (uint8_t i = 0; i < cfg->mux_entries_count; i++) {
 		const struct ti_ecap_mux_entry *entry = &cfg->mux_entries[i];
 
@@ -351,10 +350,12 @@ static int ti_ecap_init(const struct device *dev)
 	}
 
 	if (cfg->has_input_xbar) {
-		regs = DEV_REGS(dev);
+		struct ti_ecap_regs *regs = DEV_REGS(dev);
+
 		regs->ECCTL0 = (regs->ECCTL0 & ~TI_ECAP_ECCTL0_INPUTSEL_MASK) |
 			       FIELD_PREP(TI_ECAP_ECCTL0_INPUTSEL_MASK, cfg->input_xbar_channel);
 	}
+#endif /* CONFIG_PWM_TI_AM3352_ECAP_VARIANT_AM13 */
 
 	cfg->irq_config_func();
 
@@ -424,6 +425,7 @@ static DEVICE_API(pwm, ti_ecap_api) = {
 			(clock_control_subsys_t)&ti_ecap_mspm0_sys_clock_##n;                     \
 	), (BUILD_ASSERT(0, "Unsupported clock controller");))))))
 
+#ifdef CONFIG_PWM_TI_AM3352_ECAP_VARIANT_AM13
 /* One entry per "mux-states" phandle-array element: applies the crossbar
  * routing (Input or Output XBAR) named by that entry through the mux
  * subsystem.
@@ -455,12 +457,16 @@ static DEVICE_API(pwm, ti_ecap_api) = {
 		     .input_xbar_channel = DT_INST_PHA_BY_NAME(n, mux_states, input, channel),), ())
 
 #define TI_ECAP_PWREN_INIT(n)                                                                      \
-	IF_ENABLED(DT_ANY_INST_HAS_PROP_STATUS_OKAY(ti_pwren),                                    \
-		   (COND_CODE_1(DT_INST_NODE_HAS_PROP(n, ti_pwren),                               \
-				(.has_pwren = true,                                               \
-				 .pwren_syscon = DEVICE_DT_GET(DT_INST_PHANDLE(n, ti_pwren)),     \
-				 .pwren_offset = DT_INST_PHA(n, ti_pwren, offset),                \
-				 .pwren_bit = DT_INST_PHA(n, ti_pwren, bit),), ())))
+	COND_CODE_1(DT_INST_NODE_HAS_PROP(n, ti_pwren),                                           \
+		    (.has_pwren = true,                                                           \
+		     .pwren_syscon = DEVICE_DT_GET(DT_INST_PHANDLE(n, ti_pwren)),                 \
+		     .pwren_offset = DT_INST_PHA(n, ti_pwren, offset),                            \
+		     .pwren_bit = DT_INST_PHA(n, ti_pwren, bit),), ())
+#else /* !CONFIG_PWM_TI_AM3352_ECAP_VARIANT_AM13 */
+#define TI_ECAP_MUX_ENTRIES_DEFINE(n)
+#define TI_ECAP_MUX_ENTRIES_INIT(n)
+#define TI_ECAP_PWREN_INIT(n)
+#endif /* CONFIG_PWM_TI_AM3352_ECAP_VARIANT_AM13 */
 
 #define TI_ECAP_INIT(n)                                                                            \
 	TI_ECAP_DEFINE_CLK_SUBSYS(n);                                                              \
