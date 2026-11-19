@@ -35,6 +35,67 @@
 				    MSPM_SYSCTL_PWREN_XBAR_BIT>;
 			status = "disabled";
 		};
+
+		mcpwm0: mcpwm@40010000 {
+			compatible = "ti,am13e2-mcpwm";
+			reg = <0x40010000 0x1000>;
+			ti,pwren = <&sysctl MSPM_SYSCTL_PWREN_MCPERIPH
+				    MSPM_SYSCTL_PWREN_PWM0_BIT>;
+			ti,tbclk = <&sysctl MSPM_SYSCTL_PERCLKCR
+				    MSPM_SYSCTL_TBCLKSYNC_BIT>;
+			#pwm-cells = <3>;
+			clocks = <&ckm MSPM0_CLOCK_MCLK>;
+			status = "disabled";
+		};
+
+		mcpwm1: mcpwm@40011000 {
+			compatible = "ti,am13e2-mcpwm";
+			reg = <0x40011000 0x1000>;
+			ti,pwren = <&sysctl MSPM_SYSCTL_PWREN_MCPERIPH
+				    MSPM_SYSCTL_PWREN_PWM1_BIT>;
+			ti,tbclk = <&sysctl MSPM_SYSCTL_PERCLKCR
+				    MSPM_SYSCTL_TBCLKSYNC_BIT>;
+			#pwm-cells = <3>;
+			clocks = <&ckm MSPM0_CLOCK_MCLK>;
+			status = "disabled";
+		};
+
+		mcpwm2: mcpwm@40012000 {
+			compatible = "ti,am13e2-mcpwm";
+			reg = <0x40012000 0x1000>;
+			ti,pwren = <&sysctl MSPM_SYSCTL_PWREN_MCPERIPH
+				    MSPM_SYSCTL_PWREN_PWM2_BIT>;
+			ti,tbclk = <&sysctl MSPM_SYSCTL_PERCLKCR
+				    MSPM_SYSCTL_TBCLKSYNC_BIT>;
+			#pwm-cells = <3>;
+			clocks = <&ckm MSPM0_CLOCK_MCLK>;
+			status = "disabled";
+		};
+
+		mcpwm3: mcpwm@40013000 {
+			compatible = "ti,am13e2-mcpwm";
+			reg = <0x40013000 0x1000>;
+			ti,pwren = <&sysctl MSPM_SYSCTL_PWREN_MCPERIPH
+				    MSPM_SYSCTL_PWREN_PWM3_BIT>;
+			ti,tbclk = <&sysctl MSPM_SYSCTL_PERCLKCR
+				    MSPM_SYSCTL_TBCLKSYNC_BIT>;
+			#pwm-cells = <3>;
+			clocks = <&ckm MSPM0_CLOCK_MCLK>;
+			status = "disabled";
+		};
+
+		mcpwm4: mcpwm@40014000 {
+			compatible = "ti,am13e2-mcpwm";
+			reg = <0x40014000 0x1000>;
+			ti,pwren = <&sysctl MSPM_SYSCTL_PWREN_MCPERIPH
+				    MSPM_SYSCTL_PWREN_PWM4_BIT>;
+			ti,tbclk = <&sysctl MSPM_SYSCTL_PERCLKCR
+				    MSPM_SYSCTL_TBCLKSYNC_BIT>;
+			#pwm-cells = <3>;
+			clocks = <&ckm MSPM0_CLOCK_MCLK>;
+			status = "disabled";
+		};
+
 	};
 
 	cpus {
@@ -154,6 +215,7 @@
 			compatible = "ti,mspm-sysctl", "syscon";
 			reg = <0x400af000 0x2000>;
 			#pwren-cells = <2>;
+			#tbclk-cells = <2>;
 			status = "okay";
 		};
 

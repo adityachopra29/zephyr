@@ -8,6 +8,7 @@
 
 #include <ti/am13/am13e23019.dtsi>
 #include <ti/am13/am13e23019-pinctrl.dtsi>
+#include <zephyr/dt-bindings/pwm/pwm.h>
 
 / {
 	compatible = "ti,am13e23019";
@@ -15,12 +16,22 @@
 
 	aliases {
 		watchdog0 = &wdt0;
+		pwm-led0 = &pwm_led0;
 	};
 
 	chosen {
 		zephyr,sram = &sram0_1_2;
 		zephyr,flash = &flash0;
 		zephyr,crc = &crc;
+	};
+
+	pwmleds {
+		compatible = "pwm-leds";
+
+		pwm_led0: pwm_led0 {
+			/* MCPWM4_1A on PB3 — B2SALEAE J4 pin 40 / Saleae ch0 */
+			pwms = <&mcpwm4 0 PWM_MSEC(20) PWM_POLARITY_NORMAL>;
+		};
 	};
 };
 
@@ -42,5 +53,15 @@
 };
 
 &wdt0 {
+	status = "okay";
+};
+
+&pinctrl {
+	status = "okay";
+};
+
+&mcpwm4 {
+	pinctrl-0 = <&mcpwm4_1a_pb3>;
+	pinctrl-names = "default";
 	status = "okay";
 };

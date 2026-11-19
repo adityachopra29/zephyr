@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 Texas Instruments
+# SPDX-License-Identifier: Apache-2.0
+
+config PWM_TI_AM13E2_MCPWM
+	bool "TI MCPWM PWM driver"
+	default y
+	depends on DT_HAS_TI_AM13E2_MCPWM_ENABLED
+	depends on CLOCK_CONTROL
+	select PINCTRL
+	select SYSCON
+	help
+	  Enable MCPWM controller for TI SoCs
