@@ -13,6 +13,15 @@ properties:
     const: 2
     description: Number of items in a PWREN specifier (<offset bit>).
 
+  "#tbclk-cells":
+    type: int
+    const: 2
+    description: Number of items in a TBCLK specifier (<offset bit>).
+
 pwren-cells:
+  - offset
+  - bit
+
+tbclk-cells:
   - offset
   - bit

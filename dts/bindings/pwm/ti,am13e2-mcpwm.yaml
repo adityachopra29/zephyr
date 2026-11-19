@@ -1,0 +1,45 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 Texas Instruments
+# SPDX-License-Identifier: Apache-2.0
+
+description: TI SOC MCPWM based PWM controller
+
+include: [pwm-controller.yaml, base.yaml, pinctrl-device.yaml]
+
+compatible: "ti,am13e2-mcpwm"
+
+properties:
+  reg:
+    required: true
+
+  clocks:
+    required: true
+
+  symmetric:
+    type: boolean
+    description: Generate a symmetric PWM by using up-down count mode
+
+  ti,tbclk:
+    type: phandle-array
+    required: true
+    specifier-space: tbclk
+    description: |
+      Global MCPWM TBCLKSYNC gate in SYSCTL.PERCLKCR.
+      Format: <&sysctl offset bit>.
+      The same bit is shared by every MCPWM instance; the driver must
+      refcount enable/disable so clearing it does not stop other users.
+
+  ti,pwren:
+    type: phandle-array
+    required: true
+    specifier-space: pwren
+    description: |
+      Power-enable this peripheral via SYSCTL.PWREN_*.
+      Format: <&sysctl offset bit>.
+
+  "#pwm-cells":
+    const: 3
+
+pwm-cells:
+  - channel
+  - period
+  - flags
