@@ -8,6 +8,7 @@
 #include <zephyr/drivers/pinctrl.h>
 #include <zephyr/drivers/pwm.h>
 #include <zephyr/drivers/syscon.h>
+#include <zephyr/dt-bindings/misc/ti_mspm_sysctl.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/sys/atomic.h>
 #include <zephyr/sys/util.h>
@@ -22,7 +23,8 @@ LOG_MODULE_REGISTER(ti_mcpwm);
 #define TI_MCPWM_NUM_CHANNELS      (6)
 #define TI_MCPWM_NUM_PAIRS         (3)
 
-#define TI_MCPWM_SYSCTL_PWREN_KEY (0x26U << 24)
+#define TI_MCPWM_SYSCTL_PWREN_KEY  (0x26U << 24)
+#define TI_MCPWM_SYSCTL_RSTCTL_KEY (0xB1U << 24)
 
 /* Pair register block bases relative to MCPWM instance */
 #define TI_MCPWM_PAIR_OFFSET(pair) (0x100U + ((pair) * 0x200U))
@@ -60,6 +62,8 @@ struct ti_mcpwm_regs {
 #define TI_MCPWM_TBCTL_CLKDIV          GENMASK(5, 2)
 #define TI_MCPWM_TBCTL_CLKDIV_MAX      (15)
 #define TI_MCPWM_TBCTL_PRDLD           BIT(8)
+#define TI_MCPWM_TBCTL_FREE_SOFT       GENMASK(21, 20)
+#define TI_MCPWM_TBCTL_FREE_SOFT_RUN   (2)
 
 /* CMPCTL — shadow-to-active load mode per compare (0 = load on CTR=0) */
 #define TI_MCPWM_CMPCTL_LOAD_ZERO      (0)
@@ -135,11 +139,29 @@ static struct ti_mcpwm_pair_regs *ti_mcpwm_pair(struct ti_mcpwm_regs *regs, uint
 static int ti_mcpwm_pwren_enable(const struct ti_mcpwm_cfg *cfg)
 {
 	uint32_t mask;
+	uint32_t rst;
 	int ret;
 
 	if (!device_is_ready(cfg->pwren_syscon)) {
 		LOG_ERR("SYSCTL (pwren) device not ready");
 		return -ENODEV;
+	}
+
+	/*
+	 * Match SDK SYSCFG_DL_initPower(): reset the MCPWM instance before
+	 * enabling power so leftover trip-zone / force / deadband state cannot
+	 * leave the outputs in high-Z (looks like floating noise on a LA).
+	 */
+	rst = BIT(cfg->pwren_bit) | TI_MCPWM_SYSCTL_RSTCTL_KEY;
+	ret = syscon_write_reg(cfg->pwren_syscon, MSPM_SYSCTL_RSTCTL_CLEAR_MCPERIPH, rst);
+	if (ret < 0) {
+		LOG_ERR("failed to clear MCPWM reset sticky: %d", ret);
+		return ret;
+	}
+	ret = syscon_write_reg(cfg->pwren_syscon, MSPM_SYSCTL_RSTCTL_ASSERT_MCPERIPH, rst);
+	if (ret < 0) {
+		LOG_ERR("failed to assert MCPWM reset: %d", ret);
+		return ret;
 	}
 
 	mask = BIT(cfg->pwren_bit) | TI_MCPWM_SYSCTL_PWREN_KEY;
@@ -238,6 +260,10 @@ static int ti_mcpwm_configure_tbctl(const struct device *dev, uint32_t period_cy
 
 	/* shadow load TBPRDS → TBPRD on CTR = 0 */
 	tbctl &= ~TI_MCPWM_TBCTL_PRDLD;
+
+	/* Free-run under debugger (SDK basic PWM sets EMULATION_FREE_RUN) */
+	tbctl &= ~TI_MCPWM_TBCTL_FREE_SOFT;
+	tbctl |= FIELD_PREP(TI_MCPWM_TBCTL_FREE_SOFT, TI_MCPWM_TBCTL_FREE_SOFT_RUN);
 
 	tbctl &= ~TI_MCPWM_TBCTL_CTRMODE;
 	if (data->symmetric) {
@@ -391,14 +417,10 @@ static int ti_mcpwm_set_cycles(const struct device *dev, uint32_t channel, uint3
 		pulse_cycles = period_cycles;
 	}
 
-	err = ti_mcpwm_enable_channel(dev, channel);
-	if (err != 0) {
-		return err;
-	}
-
 	pair = ti_mcpwm_pair(regs, channel / 2U);
 	is_b = (channel % 2U) != 0U;
 
+	/* Program TB/CMP/AQ while TBCLK may still be gated (SDK order) */
 	ti_mcpwm_configure_aq(pair, is_b, data->symmetric, flags & PWM_POLARITY_MASK);
 
 	err = ti_mcpwm_configure_tbctl(dev, period_cycles);
@@ -425,6 +447,11 @@ static int ti_mcpwm_set_cycles(const struct device *dev, uint32_t channel, uint3
 	} else {
 		pair->CMPA = tb_pulse;
 		pair->CMPAS = tb_pulse;
+	}
+
+	err = ti_mcpwm_enable_channel(dev, channel);
+	if (err != 0) {
+		return err;
 	}
 
 	data->period_cycles[channel] = period_cycles;
