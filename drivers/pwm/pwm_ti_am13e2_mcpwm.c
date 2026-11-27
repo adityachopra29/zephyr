@@ -44,14 +44,21 @@ struct ti_mcpwm_pair_regs {
 };
 
 struct ti_mcpwm_regs {
-	uint8_t RESERVED_0[0x10];  /**< Reserved, offset: 0x00 - 0x0C */
-	volatile uint32_t TBCTL;   /**< Time-Base Control, offset: 0x10 */
-	volatile uint32_t TBPRD;   /**< Time-Base Period, offset: 0x14 */
-	volatile uint32_t TBPRDS;  /**< Time-Base Period Shadow, offset: 0x18 */
-	uint8_t RESERVED_1[0x14];  /**< Reserved, offset: 0x1C - 0x2C */
-	volatile uint32_t CMPCTL;  /**< Counter-Compare Control, offset: 0x30 */
-	uint8_t RESERVED_2[0x1C];  /**< Reserved, offset: 0x34 - 0x4C */
-	volatile uint32_t AQCTL;   /**< Action Qualifier Control, offset: 0x50 */
+	uint8_t RESERVED_0[0x10];   /**< Reserved, offset: 0x00 - 0x0C */
+	volatile uint32_t TBCTL;    /**< Time-Base Control, offset: 0x10 */
+	volatile uint32_t TBPRD;    /**< Time-Base Period, offset: 0x14 */
+	volatile uint32_t TBPRDS;   /**< Time-Base Period Shadow, offset: 0x18 */
+	uint8_t RESERVED_1[0x14];   /**< Reserved, offset: 0x1C - 0x2C */
+	volatile uint32_t CMPCTL;   /**< Counter-Compare Control, offset: 0x30 */
+	uint8_t RESERVED_2[0x1C];   /**< Reserved, offset: 0x34 - 0x4C */
+	volatile uint32_t AQCTL;    /**< Action Qualifier Control, offset: 0x50 */
+	uint8_t RESERVED_3[0x6C];   /**< Reserved, offset: 0x54 - 0xBF */
+	volatile uint32_t DBCTL;    /**< Dead-Band Control, offset: 0xC0 */
+	uint8_t RESERVED_4[0x0C];   /**< Reserved, offset: 0xC4 - 0xCF */
+	volatile uint32_t DBFED;    /**< Dead-Band Falling-Edge Delay, offset: 0xD0 */
+	volatile uint32_t DBRED;    /**< Dead-Band Rising-Edge Delay, offset: 0xD4 */
+	volatile uint32_t DBFEDS;   /**< DBFED Shadow, offset: 0xD8 */
+	volatile uint32_t DBREDS;   /**< DBRED Shadow, offset: 0xDC */
 };
 
 /* TBCTL */
@@ -102,6 +109,23 @@ struct ti_mcpwm_regs {
 #define TI_MCPWM_AQSFRC_CONTINUOUS_LOW  (1)
 #define TI_MCPWM_AQSFRC_CONTINUOUS_HIGH (2)
 
+/* DBCTL — classical dead-band (TRM §26.7 / Table 26-51) */
+#define TI_MCPWM_DBCTL_OUT_MODE        GENMASK(1, 0)
+#define TI_MCPWM_DBCTL_OUT_MODE_BYPASS (0)
+#define TI_MCPWM_DBCTL_OUT_MODE_FULL   (3) /* RED on A-path, FED on B-path */
+#define TI_MCPWM_DBCTL_POLSEL          GENMASK(3, 2)
+#define TI_MCPWM_DBCTL_IN_MODE         GENMASK(5, 4)
+#define TI_MCPWM_DBCTL_IN_MODE_PWMA    (0) /* both delays from AQ PWMA */
+#define TI_MCPWM_DBCTL_OUTSWAP         GENMASK(7, 6)
+#define TI_MCPWM_DBCTL_DEDB_MODE       BIT(8)
+#define TI_MCPWM_DBCTL_LOADFEDMODE     GENMASK(17, 16)
+#define TI_MCPWM_DBCTL_LOADREDMODE     GENMASK(19, 18)
+#define TI_MCPWM_DBCTL_LOAD_ZERO       (0)
+
+/* DBRED / DBFED — 14-bit delay counts in TBCLK ticks */
+#define TI_MCPWM_DB_DELAY_MASK         GENMASK(13, 0)
+#define TI_MCPWM_DB_DELAY_MAX          (BIT(14) - 1U)
+
 #define DEV_CFG(dev)  ((const struct ti_mcpwm_cfg *)(dev)->config)
 #define DEV_DATA(dev) ((struct ti_mcpwm_data *)(dev)->data)
 #define DEV_REGS(dev) ((struct ti_mcpwm_regs *)DEVICE_MMIO_GET(dev))
@@ -117,6 +141,10 @@ struct ti_mcpwm_cfg {
 	uint32_t tbclk_offset;
 	uint8_t tbclk_bit;
 	const struct pinctrl_dev_config *pcfg;
+	bool db_enable;
+	uint8_t db_polsel;
+	uint16_t db_red;
+	uint16_t db_fed;
 };
 
 struct ti_mcpwm_data {
@@ -134,6 +162,43 @@ static atomic_t ti_mcpwm_tbclk_refcount;
 static struct ti_mcpwm_pair_regs *ti_mcpwm_pair(struct ti_mcpwm_regs *regs, uint32_t pair)
 {
 	return (struct ti_mcpwm_pair_regs *)((uint8_t *)regs + TI_MCPWM_PAIR_OFFSET(pair));
+}
+
+/*
+ * Program the instance-wide dead-band block from DT.
+ * Classical template: OUT_MODE=full, IN_MODE=PWMA, no OUTSWAP/DEDB;
+ * only POLSEL differs per ah/alc/ahc/al (matches ti,deadband-mode enum index).
+ */
+static int ti_mcpwm_db_apply(struct ti_mcpwm_regs *regs, const struct ti_mcpwm_cfg *cfg)
+{
+	uint32_t dbctl;
+
+	if (!cfg->db_enable) {
+		regs->DBCTL = FIELD_PREP(TI_MCPWM_DBCTL_OUT_MODE, TI_MCPWM_DBCTL_OUT_MODE_BYPASS);
+		return 0;
+	}
+
+	if (cfg->db_red > TI_MCPWM_DB_DELAY_MAX || cfg->db_fed > TI_MCPWM_DB_DELAY_MAX) {
+		LOG_ERR("deadband delay exceeds 14-bit max (%u)",
+			(unsigned int)TI_MCPWM_DB_DELAY_MAX);
+		return -EINVAL;
+	}
+
+	regs->DBRED = cfg->db_red & TI_MCPWM_DB_DELAY_MASK;
+	regs->DBREDS = cfg->db_red & TI_MCPWM_DB_DELAY_MASK;
+	regs->DBFED = cfg->db_fed & TI_MCPWM_DB_DELAY_MASK;
+	regs->DBFEDS = cfg->db_fed & TI_MCPWM_DB_DELAY_MASK;
+
+	dbctl = FIELD_PREP(TI_MCPWM_DBCTL_OUT_MODE, TI_MCPWM_DBCTL_OUT_MODE_FULL) |
+		FIELD_PREP(TI_MCPWM_DBCTL_POLSEL, cfg->db_polsel) |
+		FIELD_PREP(TI_MCPWM_DBCTL_IN_MODE, TI_MCPWM_DBCTL_IN_MODE_PWMA) |
+		FIELD_PREP(TI_MCPWM_DBCTL_OUTSWAP, 0) |
+		FIELD_PREP(TI_MCPWM_DBCTL_LOADFEDMODE, TI_MCPWM_DBCTL_LOAD_ZERO) |
+		FIELD_PREP(TI_MCPWM_DBCTL_LOADREDMODE, TI_MCPWM_DBCTL_LOAD_ZERO);
+	/* DEDB_MODE left clear — normal dual-path dead-band */
+
+	regs->DBCTL = dbctl;
+	return 0;
 }
 
 static int ti_mcpwm_pwren_enable(const struct ti_mcpwm_cfg *cfg)
@@ -509,6 +574,11 @@ static int ti_mcpwm_init(const struct device *dev)
 		      FIELD_PREP(TI_MCPWM_AQCTL_PWM3_LDAQAMODE, TI_MCPWM_AQCTL_LOAD_ZERO) |
 		      FIELD_PREP(TI_MCPWM_AQCTL_PWM3_LDAQBMODE, TI_MCPWM_AQCTL_LOAD_ZERO);
 
+	ret = ti_mcpwm_db_apply(regs, cfg);
+	if (ret < 0) {
+		return ret;
+	}
+
 	ret = pinctrl_apply_state(cfg->pcfg, PINCTRL_STATE_DEFAULT);
 	if (ret < 0) {
 		LOG_ERR("failed to configure pinctrl: %d", ret);
@@ -537,6 +607,11 @@ static DEVICE_API(pwm, ti_mcpwm_api) = {
 		.tbclk_offset = DT_INST_PHA(n, ti_tbclk, offset),                                  \
 		.tbclk_bit = DT_INST_PHA(n, ti_tbclk, bit),                                        \
 		.pcfg = PINCTRL_DT_INST_DEV_CONFIG_GET(n),                                         \
+		.db_enable = DT_INST_NODE_HAS_PROP(n, ti_deadband_mode),                           \
+		.db_polsel = COND_CODE_1(DT_INST_NODE_HAS_PROP(n, ti_deadband_mode),               \
+					 (DT_INST_ENUM_IDX(n, ti_deadband_mode)), (0)),            \
+		.db_red = DT_INST_PROP_OR(n, ti_deadband_red, 0),                                  \
+		.db_fed = DT_INST_PROP_OR(n, ti_deadband_fed, 0),                                  \
 	};                                                                                         \
                                                                                                    \
 	static struct ti_mcpwm_data ti_mcpwm_data_##n = {                                          \

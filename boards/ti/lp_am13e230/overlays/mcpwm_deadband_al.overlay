@@ -1,0 +1,12 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Texas Instruments
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * B2SALEAE: Active Low dead-band (POLSEL=11). Saleae ch0=1A, ch1=1B.
+ */
+
+#include "mcpwm_deadband_saleae.dtsi"
+
+&mcpwm4 {
+	ti,deadband-mode = "al";
+};

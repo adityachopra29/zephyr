@@ -1,0 +1,19 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Texas Instruments
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Shared Saleae bring-up for MCPWM4 pair 1 on B2SALEAE:
+ *   ch0 J4.40 PB3 = MCPWM4_1A
+ *   ch1 J4.39 PA7 = MCPWM4_1B
+ *
+ * RED/FED = 1000 TBCLK (5 µs at 200 MHz TBCLK, matches SDK mcpwm_deadband).
+ * Included by mcpwm_deadband_{ah,alc,ahc,al}.overlay — pick one mode per build.
+ */
+
+&mcpwm4 {
+	pinctrl-0 = <&mcpwm4_1a_pb3 &mcpwm4_1b_pa7>;
+	pinctrl-names = "default";
+	ti,deadband-red = <1000>;
+	ti,deadband-fed = <1000>;
+	status = "okay";
+};

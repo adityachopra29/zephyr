@@ -36,6 +36,42 @@ properties:
       Power-enable this peripheral via SYSCTL.PWREN_*.
       Format: <&sysctl offset bit>.
 
+  ti,deadband-mode:
+    type: string
+    description: |
+      Enable the instance-wide dead-band submodule and select classical
+      polarity (TRM DBCTL.POLSEL). Omit this property to leave dead-band
+      bypassed (OUT_MODE = 00); pins then follow the action-qualifier
+      outputs directly.
+
+      One DBCTL/DBRED/DBFED block is shared by all three A/B pairs on
+      this MCPWM instance. Classical modes use PWMA as the source for
+      both rising- and falling-edge delays (IN_MODE = 00); drive duty on
+      the A channel and take the complementary/delayed B from the pin.
+
+      Enum order matches POLSEL encoding:
+        "ah"  — active high (neither inverted)
+        "alc" — active low complementary (A inverted)
+        "ahc" — active high complementary (B inverted)
+        "al"  — active low (both inverted)
+    enum:
+      - "ah"
+      - "alc"
+      - "ahc"
+      - "al"
+
+  ti,deadband-red:
+    type: int
+    description: |
+      Rising-edge delay in TBCLK ticks (DBRED, 14-bit, 0..16383).
+      Used when ti,deadband-mode is set; defaults to 0 if omitted.
+
+  ti,deadband-fed:
+    type: int
+    description: |
+      Falling-edge delay in TBCLK ticks (DBFED, 14-bit, 0..16383).
+      Used when ti,deadband-mode is set; defaults to 0 if omitted.
+
   "#pwm-cells":
     const: 3
 
